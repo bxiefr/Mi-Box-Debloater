@@ -1,1 +1,961 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mi Box Debloater</title>
+<meta name="description" content="Remove Mi TV+, Mi Music, analytics services and other preinstalled apps from your Xiaomi Mi Box. Backup and restore included, no ADB install needed.">
+<meta name="theme-color" content="#E8ECF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E1727" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Mi Box Debloater">
+<meta property="og:description" content="Get the junk off your Mi Box. One tool, a backup before every change, no ADB install.">
+<meta property="og:url" content="https://github.com/bxiefr/Mi-Box-Debloater">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='5' width='28' height='18' rx='4' fill='none' stroke='%230F1B2D' stroke-width='2.6'/%3E%3Crect x='7' y='10' width='7' height='4.5' rx='1.4' fill='%23FF6700'/%3E%3Crect x='16' y='10' width='9' height='4.5' rx='1.4' fill='%230F1B2D' opacity='.35'/%3E%3Cpath d='M11 28h10' stroke='%230F1B2D' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --wall:#E8ECF1;
+  --wall-2:#DCE3EB;
+  --ink:#0F1B2D;
+  --ink-2:#44546A;
+  --line:#C3CDD9;
+  --screen:#0A111D;
+  --bezel:#1B2638;
+  --accent:#FF6700;
+  --accent-ink:#1A0B00;
+  --accent-text:#B84A00;
+  --focus:#1F6FEB;
+  --term:#0A111D;
+  --shadow:0 30px 60px -28px rgba(15,27,45,.45),0 10px 24px -12px rgba(15,27,45,.3);
+  --sans:"Bricolage Grotesque",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --wall:#0E1727;
+    --wall-2:#152238;
+    --ink:#E9EEF5;
+    --ink-2:#A3B3C8;
+    --line:#26364F;
+    --screen:#070C15;
+    --bezel:#22304A;
+    --accent-text:#FF8A3D;
+    --focus:#7DB4FF;
+    --shadow:0 30px 70px -24px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04);
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--wall);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.6;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+img,svg{display:block;max-width:100%}
+a{color:inherit;text-underline-offset:.2em}
+code,kbd{font-family:var(--mono);font-size:.88em}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px;border-radius:6px}
+.skip{
+  position:absolute;left:12px;top:-60px;z-index:100;
+  background:var(--ink);color:var(--wall);padding:10px 16px;border-radius:10px;text-decoration:none;font-weight:600;
+}
+.skip:focus{top:12px}
+.container{width:min(1160px,100% - 40px);margin-inline:auto}
 
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--wall) 88%,transparent);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav__row{display:flex;align-items:center;gap:20px;min-height:64px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-stretch:88%;font-size:19px;letter-spacing:-.01em;text-decoration:none;white-space:nowrap}
+.nav__links{display:none;gap:26px;margin-left:24px}
+.nav__links a{text-decoration:none;color:var(--ink-2);font-weight:500;font-size:15px}
+.nav__links a:hover{color:var(--ink)}
+.nav__end{margin-left:auto;display:flex;align-items:center;gap:12px}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;padding:2px}
+.seg button{
+  font:inherit;font-size:13px;font-weight:650;letter-spacing:.02em;
+  border:0;background:transparent;color:var(--ink-2);padding:5px 10px;border-radius:7px;cursor:pointer;
+}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--wall)}
+@media (min-width:860px){.nav__links{display:flex}}
+@media (max-width:560px){
+  .nav__row{gap:12px}
+  .nav__end .btn{display:none}
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:.6em;
+  padding:.8em 1.3em;border-radius:12px;
+  font:inherit;font-weight:650;font-size:16px;line-height:1.2;
+  text-decoration:none;border:1.5px solid transparent;cursor:pointer;
+  transition:transform .15s ease,background-color .15s ease,color .15s ease,border-color .15s ease;
+}
+.btn:active{transform:translateY(1px)}
+.btn--primary{background:var(--accent);color:var(--accent-ink)}
+.btn--primary:hover{background:#FF7A1F}
+.btn--line{border-color:var(--ink);color:var(--ink);background:transparent}
+.btn--line:hover{background:var(--ink);color:var(--wall)}
+.btn--small{padding:.5em .85em;font-size:14px;border-radius:10px}
+.btn__meta{font-weight:500;opacity:.75;font-size:.88em}
+.star-count:empty{display:none}
+.star-count{font-variant-numeric:tabular-nums;font-weight:500;opacity:.8}
+
+.hero{padding:clamp(40px,7vw,88px) 0 clamp(56px,8vw,104px)}
+.hero__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:56px;align-items:center}
+@media (min-width:1020px){.hero__grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px}}
+.hero h1{
+  margin:0;
+  font-size:clamp(42px,6.4vw,82px);
+  font-weight:760;
+  font-stretch:80%;
+  line-height:.98;
+  letter-spacing:-.035em;
+  text-wrap:balance;
+}
+.hero__sub{margin:24px 0 0;max-width:46ch;font-size:clamp(17px,1.6vw,20px);color:var(--ink-2)}
+.hero__cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.hero__fine{margin:18px 0 0;font-size:14px;color:var(--ink-2)}
+
+.stage{min-width:0}
+.tv-frame{
+  background:var(--bezel);
+  padding:clamp(7px,1.4vw,13px);
+  border-radius:clamp(14px,2vw,22px);
+  box-shadow:var(--shadow);
+}
+.tv-screen{
+  container-type:inline-size;
+  aspect-ratio:16/9;
+  background:var(--screen);
+  border-radius:clamp(8px,1.2vw,12px);
+  overflow:hidden;
+  position:relative;
+  color:#E8EEF7;
+}
+.tv-ui{
+  height:100%;
+  display:flex;flex-direction:column;
+  padding:3.2cqw 3.4cqw;
+  gap:2.2cqw;
+}
+.tv-top{display:flex;justify-content:space-between;align-items:baseline}
+.tv-title{font-size:max(13px,3.4cqw);font-weight:700;font-stretch:90%;letter-spacing:-.01em}
+.tv-count{font-size:max(10px,2.3cqw);color:#93A4BC;margin-left:1.4cqw;font-weight:500;font-variant-numeric:tabular-nums}
+.tv-device{font-size:max(9.5px,2.1cqw);color:#6E7F98;font-weight:500}
+.tv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.6cqw;align-content:start}
+.tile{
+  --tile:#2B3647;
+  background:var(--tile);
+  aspect-ratio:2.2/1;
+  border-radius:1.3cqw;
+  padding:1.2cqw 1.5cqw;
+  display:flex;align-items:flex-end;
+  font-size:max(9.5px,2.1cqw);
+  font-weight:650;
+  line-height:1.1;
+  color:#fff;
+  min-width:0;
+}
+.tile[hidden]{display:none}
+.tv-status{margin-top:auto;font-size:max(9.5px,2.2cqw);color:#93A4BC;display:flex;align-items:center;gap:1.2cqw}
+.tv-status b{color:#fff;font-weight:650}
+.tv-dot{width:1.5cqw;height:1.5cqw;min-width:7px;min-height:7px;border-radius:50%;background:var(--accent)}
+
+.remote{display:flex;align-items:center;gap:18px;margin-top:26px}
+.ok{
+  position:relative;flex:none;
+  width:68px;height:68px;border-radius:50%;
+  border:0;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink);
+  font:inherit;font-weight:800;font-size:17px;letter-spacing:.01em;
+  box-shadow:0 10px 22px -10px rgba(255,103,0,.9),inset 0 -3px 0 rgba(0,0,0,.14);
+  transition:transform .15s ease;
+}
+.ok:active{transform:scale(.95)}
+.ok.is-hint{animation:ring 1.7s ease-out 3}
+@keyframes ring{
+  0%{box-shadow:0 10px 22px -10px rgba(255,103,0,.9),0 0 0 0 rgba(255,103,0,.5)}
+  100%{box-shadow:0 10px 22px -10px rgba(255,103,0,.9),0 0 0 24px rgba(255,103,0,0)}
+}
+.remote__text{margin:0;font-weight:560;font-size:17px;max-width:30ch}
+.remote__sub{display:block;font-weight:400;font-size:14px;color:var(--ink-2);margin-top:2px}
+
+.section{padding:clamp(56px,8vw,104px) 0}
+.section--tint{background:var(--wall-2)}
+.section h2{
+  margin:0;
+  font-size:clamp(31px,4.2vw,50px);
+  font-weight:720;
+  font-stretch:82%;
+  letter-spacing:-.028em;
+  line-height:1.04;
+  text-wrap:balance;
+  max-width:20ch;
+}
+.lead{margin:18px 0 0;max-width:58ch;color:var(--ink-2);font-size:18px}
+
+.steps{list-style:none;margin:48px 0 0;padding:0;display:grid;gap:0;counter-reset:step}
+.steps li{
+  display:grid;grid-template-columns:56px 1fr;gap:8px 20px;
+  padding:28px 0;border-top:1px solid var(--line);
+  counter-increment:step;
+}
+.steps li:last-child{border-bottom:1px solid var(--line)}
+.steps li::before{
+  content:counter(step);
+  grid-row:1 / span 2;
+  font-size:46px;font-weight:300;font-stretch:78%;line-height:1;
+  color:var(--accent-text);
+}
+.steps h3{margin:0;font-size:21px;font-weight:680;letter-spacing:-.01em;line-height:1.25}
+.steps p{margin:0;color:var(--ink-2);max-width:62ch}
+@media (min-width:860px){
+  .steps li{grid-template-columns:80px minmax(0,1fr) minmax(0,1.3fr);align-items:baseline}
+  .steps li::before{grid-row:auto;font-size:56px}
+  .steps h3{grid-column:2}
+  .steps p{grid-column:3}
+}
+
+.feat{display:grid;grid-template-columns:minmax(0,1fr);margin:44px 0 0;gap:0 56px}
+@media (min-width:760px){.feat{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.feat div{padding:22px 0 26px;border-top:1px solid var(--line)}
+.feat dt{font-weight:680;font-size:18px;letter-spacing:-.005em}
+.feat dd{margin:6px 0 0;color:var(--ink-2);max-width:52ch}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr);gap:48px;align-items:start}
+@media (min-width:940px){.split{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:64px}}
+.term{background:var(--term);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;color:#DCE6F2}
+.term__bar{padding:12px 18px;font-family:var(--mono);font-size:12.5px;color:#7F90A8;border-bottom:1px solid #1B2638}
+.term pre{margin:0;padding:18px 20px 22px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.65;white-space:pre}
+.c{color:#5FD7E8}.g{color:#6BDC8B}.y{color:#F2D15C}.d{color:#8394AC}.w{color:#fff;font-weight:500}
+.split__side h3{margin:0;font-size:24px;font-weight:700;font-stretch:88%;letter-spacing:-.015em}
+.split__side p{color:var(--ink-2);max-width:48ch}
+.cli{display:flex;align-items:stretch;background:var(--term);border-radius:12px;margin-top:20px;overflow:hidden}
+.cli code{flex:1;min-width:0;padding:14px 16px;color:#DCE6F2;white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.55}
+.cli button{
+  flex:none;border:0;border-left:1px solid #1B2638;background:transparent;color:#B9C7DA;
+  font:inherit;font-size:14px;font-weight:600;padding:0 18px;cursor:pointer;
+}
+.cli button:hover{background:#121C2E;color:#fff}
+
+.safe{display:grid;grid-template-columns:minmax(0,1fr);gap:32px}
+@media (min-width:940px){.safe{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:64px}}
+.safe p{margin:0 0 16px;color:var(--ink-2);max-width:56ch}
+.safe p:last-child{margin-bottom:0}
+.safe strong{color:var(--ink);font-weight:650}
+
+.tools{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;margin-top:36px}
+.search{
+  flex:1 1 240px;max-width:340px;
+  font:inherit;font-size:16px;color:var(--ink);
+  background:var(--wall);border:1.5px solid var(--line);border-radius:10px;padding:.6em .9em;
+}
+.search::placeholder{color:var(--ink-2);opacity:.8}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  font:inherit;font-size:14px;font-weight:600;color:var(--ink);
+  background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:.35em .9em;cursor:pointer;
+}
+.chip:hover{border-color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--wall);border-color:var(--ink)}
+.count{margin:18px 0 0;font-size:14px;color:var(--ink-2)}
+.pkgs{width:100%;border-collapse:collapse;margin-top:10px}
+.pkgs th{text-align:left;font-size:13px;font-weight:600;color:var(--ink-2);padding:10px 12px 10px 0;border-bottom:1.5px solid var(--ink)}
+.pkgs td{padding:10px 12px 10px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+.pkgs td:first-child{font-family:var(--mono);font-size:13.5px;word-break:break-all;width:46%}
+.pkgs .grp{display:inline-block;margin-left:10px;font-size:13px;color:var(--ink-2)}
+@media (max-width:640px){
+  .pkgs thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .pkgs,.pkgs tbody,.pkgs tr,.pkgs td{display:block;width:auto}
+  .pkgs tr{padding:12px 0;border-bottom:1px solid var(--line)}
+  .pkgs td{padding:0;border:0}
+  .pkgs td:first-child{width:auto;word-break:normal;overflow-wrap:anywhere}
+  .pkgs td + td{margin-top:2px}
+  .pkgs .grp{margin-left:8px}
+}
+.empty{padding:28px 0;color:var(--ink-2)}
+.note{margin:26px 0 0;padding-left:16px;border-left:3px solid var(--accent);max-width:64ch;color:var(--ink-2)}
+
+.faq{margin-top:40px;border-top:1px solid var(--line)}
+.faq details{border-bottom:1px solid var(--line)}
+.faq summary{
+  list-style:none;cursor:pointer;
+  display:flex;justify-content:space-between;gap:24px;align-items:center;
+  padding:22px 0;font-weight:650;font-size:19px;letter-spacing:-.005em;
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{
+  content:"";flex:none;width:12px;height:12px;
+  border-right:2.5px solid var(--ink-2);border-bottom:2.5px solid var(--ink-2);
+  transform:rotate(45deg) translate(-3px,-3px);
+  transition:transform .2s ease;
+}
+.faq details[open] summary::after{transform:rotate(225deg) translate(-3px,-3px)}
+.faq p{margin:0 0 24px;max-width:66ch;color:var(--ink-2)}
+
+.final{padding:clamp(64px,9vw,120px) 0}
+.final h2{max-width:16ch}
+.final .hero__cta{margin-top:30px}
+.foot{border-top:1px solid var(--line);padding:30px 0 48px;color:var(--ink-2);font-size:14px}
+.foot__row{display:flex;flex-wrap:wrap;gap:12px 28px;justify-content:space-between}
+.foot nav{display:flex;flex-wrap:wrap;gap:8px 22px}
+.foot p{margin:0;max-width:62ch}
+
+@media (max-width:520px){
+  .remote{gap:14px}
+  .ok{width:60px;height:60px}
+  .steps li::before{font-size:38px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .ok.is-hint{animation:none}
+  .btn,.ok,.faq summary::after{transition:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+
+<header class="nav">
+  <div class="container nav__row">
+    <a class="brand" href="#top" aria-label="Mi Box Debloater">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true">
+        <rect x="2" y="5" width="28" height="18" rx="4" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <rect x="7" y="10" width="7" height="4.5" rx="1.4" fill="var(--accent)"/>
+        <rect x="16" y="10" width="9" height="4.5" rx="1.4" fill="currentColor" opacity=".35"/>
+        <path d="M11 28h10" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+      Mi Box Debloater
+    </a>
+    <nav class="nav__links" aria-label="Sections">
+      <a href="#how" data-i18n="nav_how">How it works</a>
+      <a href="#features" data-i18n="nav_features">Features</a>
+      <a href="#packages" data-i18n="nav_packages">Packages</a>
+      <a href="#faq" data-i18n="nav_faq">FAQ</a>
+    </nav>
+    <div class="nav__end">
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+      </div>
+      <a class="btn btn--line btn--small" href="https://github.com/bxiefr/Mi-Box-Debloater" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+        <span data-i18n="star">Star</span>
+        <span class="star-count" data-stars></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="container hero__grid">
+      <div>
+        <h1 data-i18n="h1">Get the junk off your Mi Box.</h1>
+        <p class="hero__sub" data-i18n="sub">Remove Mi TV+, Mi Music, analytics services and other preinstalled apps from a Windows PC in a few minutes. Everything is backed up first, and nothing system-critical can be touched.</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" data-download href="https://github.com/bxiefr/Mi-Box-Debloater/releases/latest">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 20h14"/></svg>
+            <span data-i18n="download">Download for Windows</span>
+            <span class="btn__meta" data-version></span>
+          </a>
+          <a class="btn btn--line" href="https://github.com/bxiefr/Mi-Box-Debloater" target="_blank" rel="noopener" data-i18n="source">View the source</a>
+        </div>
+        <p class="hero__fine" data-i18n="fine">Free and open source, MIT license.</p>
+      </div>
+
+      <div class="stage" role="group" aria-labelledby="demo-label">
+        <div class="tv-frame">
+          <div class="tv-screen">
+            <div class="tv-ui" aria-hidden="true">
+              <div class="tv-top">
+                <div><span class="tv-title" data-i18n="tv_home">Home</span><span class="tv-count" id="tv-count"></span></div>
+                <span class="tv-device">Mi Box</span>
+              </div>
+              <div class="tv-grid" id="tv-grid"></div>
+              <div class="tv-status"><span class="tv-dot"></span><span id="tv-status"></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="remote">
+          <button class="ok is-hint" id="ok" type="button" aria-describedby="demo-hint"></button>
+          <p class="remote__text">
+            <span id="demo-label" data-i18n="demo_label">Try it on a Mi Box home screen</span>
+            <span class="remote__sub" id="demo-hint" aria-live="polite"></span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="how">
+    <div class="container">
+      <h2 data-i18n="how_h">Three steps, nothing to install</h2>
+      <ol class="steps">
+        <li>
+          <h3 data-i18n="s1_h">Turn on debugging on the Mi Box</h3>
+          <p data-i18n="s1_p">In Settings, Device Preferences, About, tap Build seven times. Then open Developer options and switch on USB debugging or Network debugging. You'll find the IP address under Network and Internet.</p>
+        </li>
+        <li>
+          <h3 data-i18n="s2_h">Run the tool on a PC on the same network</h3>
+          <p data-i18n="s2_p">Download the exe, open it, pick your language and enter the Mi Box IP address. The first time, accept the prompt that appears on the TV.</p>
+        </li>
+        <li>
+          <h3 data-i18n="s3_h">Review the list and confirm</h3>
+          <p data-i18n="s3_p">You see every package before anything changes. Confirm, and the tool removes them, saves a backup and shortens the interface animations.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="container">
+      <h2 data-i18n="feat_h">Careful by design</h2>
+      <dl class="feat">
+        <div><dt data-i18n="f1_t">Backup and restore</dt><dd data-i18n="f1_d">A JSON backup is saved before anything is removed. One menu choice brings every package back.</dd></div>
+        <div><dt data-i18n="f2_t">Dry run</dt><dd data-i18n="f2_d">See exactly what would be removed while changing nothing.</dd></div>
+        <div><dt data-i18n="f3_t">Protected packages</dt><dd data-i18n="f3_d">The launcher, settings, Play Services and other system parts are skipped even if they end up on the list.</dd></div>
+        <div><dt data-i18n="f4_t">ADB included</dt><dd data-i18n="f4_d">The Windows build ships with Android platform-tools. No install, no PATH to edit.</dd></div>
+        <div><dt data-i18n="f5_t">Honest results</dt><dd data-i18n="f5_d">Every package shows done or failed with ADB's real message, and a log is saved to mibox_debloater.log.</dd></div>
+        <div><dt data-i18n="f6_t">Package list export</dt><dd data-i18n="f6_d">Save everything installed on your device to a text file, handy for bug reports and pull requests.</dd></div>
+        <div><dt data-i18n="f7_t">Optional dexopt</dt><dd data-i18n="f7_d">Compiling every app takes 10 to 30 minutes on a Mi Box, so the tool asks before it starts.</dd></div>
+        <div><dt data-i18n="f8_t">Turkish and English</dt><dd data-i18n="f8_d">Pick the language at startup, or pass --lang.</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section--tint">
+    <div class="container split">
+      <div class="term" role="figure" aria-labelledby="term-cap">
+        <div class="term__bar" id="term-cap">Mi-Box-Debloater.exe</div>
+        <pre id="term"></pre>
+      </div>
+      <div class="split__side">
+        <h3 data-i18n="term_h">What you'll see</h3>
+        <p data-i18n="term_p">The tool is a terminal app. This is a shortened example of its output, with a risk label for every package and a confirmation before anything is removed.</p>
+        <h3 data-i18n="cli_h">Prefer scripting?</h3>
+        <p data-i18n="cli_p">Pass options on the command line. The full list is in the README.</p>
+        <div class="cli">
+          <code id="cli-cmd">Mi-Box-Debloater.exe --ip 192.168.1.45 --lang en --dry-run</code>
+          <button type="button" id="copy" data-i18n="copy">Copy</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="safety">
+    <div class="container">
+      <h2 data-i18n="safe_h">What it never touches</h2>
+      <div class="safe" style="margin-top:36px">
+        <p data-i18n-html="safe_p1"></p>
+        <p data-i18n-html="safe_p2"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint" id="packages">
+    <div class="container">
+      <h2 data-i18n="pkg_h">Everything it removes</h2>
+      <p class="lead" id="pkg-lead"></p>
+      <div class="tools">
+        <input class="search" id="search" type="search" autocomplete="off" spellcheck="false" aria-label="Search packages">
+        <div class="chips" id="chips" role="group" aria-label="Filter by group"></div>
+      </div>
+      <p class="count" id="count" aria-live="polite"></p>
+      <table class="pkgs">
+        <thead><tr><th scope="col" data-i18n="th_pkg">Package</th><th scope="col" data-i18n="th_what">What it is</th></tr></thead>
+        <tbody id="pkg-body"></tbody>
+      </table>
+      <p class="empty" id="empty" hidden></p>
+      <p class="note" data-i18n="pkg_note">If you use one of these apps, such as Disney+, restore it afterwards from the menu, or look at the list first with --dry-run.</p>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container">
+      <h2 data-i18n="faq_h">Questions</h2>
+      <div class="faq">
+        <details><summary data-i18n="q1">Do I need to install ADB?</summary><p data-i18n="a1">No. The Windows exe includes Android platform-tools. If you run main.py yourself, ADB must be in your PATH.</p></details>
+        <details><summary data-i18n="q2">Can I undo it?</summary><p data-i18n="a2">Yes. A backup is saved before anything is removed. Choose Restore in the menu or run the tool with --restore. A factory reset also brings everything back.</p></details>
+        <details><summary data-i18n="q3">Windows shows a SmartScreen warning.</summary><p data-i18n="a3">The exe is built with PyInstaller and isn't code-signed, which often triggers a warning. It is built by a public GitHub Actions workflow from the source in the repository, and you can build it yourself.</p></details>
+        <details><summary data-i18n="q4">It can't connect to my Mi Box.</summary><p data-i18n="a4">Check that the PC and the Mi Box are on the same network, Network debugging is on, and you accepted the prompt on the TV. ADB's real error is shown on screen and saved to mibox_debloater.log.</p></details>
+        <details><summary data-i18n="q5">Does it work on other Android TV devices?</summary><p data-i18n="a5">It is made for the Mi Box series. Other devices may work, but package names differ. Export the package list, review it, and run with --dry-run first.</p></details>
+        <details><summary data-i18n="q6">Why is dexopt optional?</summary><p data-i18n="a6">It compiles every app and can take 10 to 30 minutes on a Mi Box. Most of the speed-up comes from removing bloat and shortening animations.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tint final">
+    <div class="container">
+      <h2 data-i18n="final_h">Did it help? Leave a star.</h2>
+      <p class="lead" data-i18n="final_p">Stars help other Mi Box owners find the tool.</p>
+      <div class="hero__cta">
+        <a class="btn btn--primary" data-download href="https://github.com/bxiefr/Mi-Box-Debloater/releases/latest">
+          <span data-i18n="download">Download for Windows</span>
+          <span class="btn__meta" data-version></span>
+        </a>
+        <a class="btn btn--line" href="https://github.com/bxiefr/Mi-Box-Debloater" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>
+          <span data-i18n="star_gh">Star on GitHub</span>
+          <span class="star-count" data-stars></span>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="container foot__row">
+    <p data-i18n="disclaimer">Mi Box Debloater is not affiliated with Xiaomi or Google. It is provided as is, and you use it at your own risk. Windows builds include Android SDK Platform-Tools by Google.</p>
+    <nav aria-label="Project links">
+      <a href="https://github.com/bxiefr/Mi-Box-Debloater" target="_blank" rel="noopener" data-i18n="l_src">Source</a>
+      <a href="https://github.com/bxiefr/Mi-Box-Debloater/releases" target="_blank" rel="noopener" data-i18n="l_rel">Releases</a>
+      <a href="https://github.com/bxiefr/Mi-Box-Debloater/issues" target="_blank" rel="noopener" data-i18n="l_bug">Report a bug</a>
+      <a href="https://github.com/bxiefr/Mi-Box-Debloater/blob/main/README.tr.md" target="_blank" rel="noopener">README (Türkçe)</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+const REPO = "bxiefr/Mi-Box-Debloater";
+
+const PKGS = [
+  ["xiaomi", "com.mitv.tvhome.mitvplus", "Mi TV+", "Mi TV+"],
+  ["xiaomi", "com.xiaomi.mimusic2", "Mi Music", "Mi Music"],
+  ["xiaomi", "com.mitv.videoplayer", "Mi video player", "Mi video oynatıcı"],
+  ["xiaomi", "com.mitv.gallery", "Gallery", "Galeri"],
+  ["xiaomi", "com.xiaomi.mitv.mediaexplorer", "Media explorer", "Medya gezgini"],
+  ["xiaomi", "com.xiaomo.tv.milegal", "Legal documents app", "Yasal metin uygulaması"],
+  ["xiaomi", "com.mitv.tvhome.michannel", "Mi channel", "Mi kanal"],
+  ["xiaomi", "com.xiaomi.mibox.gamecenter", "Game center", "Oyun merkezi"],
+  ["xiaomi", "com.xiaomi.tv.recommend", "Recommendation service", "Öneri servisi"],
+  ["analytics", "com.miui.tv.analytics", "Analytics service", "Analitik servisi"],
+  ["analytics", "com.xiaomi.statistic", "Statistics service", "İstatistik servisi"],
+  ["google", "com.google.android.feedback", "Feedback service", "Geri bildirim servisi"],
+  ["google", "com.google.android.partnersetup", "Partner setup", "Partner kurulumu"],
+  ["google", "com.google.android.syncadapters.calendar", "Calendar sync", "Takvim senkronu"],
+  ["google", "com.google.android.syncadapters.contacts", "Contacts sync", "Kişi senkronu"],
+  ["google", "com.google.android.videos", "Play Movies", "Play Filmler"],
+  ["google", "com.google.android.music", "Play Music", "Play Müzik"],
+  ["google", "com.google.android.play.games", "Play Games", "Play Oyunlar"],
+  ["google", "com.google.android.youtube.tvmusic", "YouTube Music TV", "YouTube Music TV"],
+  ["streaming", "com.amazon.amazonvideo.livingroom", "Prime Video", "Prime Video"],
+  ["streaming", "com.disney.disneyplus", "Disney+", "Disney+"],
+  ["streaming", "com.apple.atve.androidtv.appletv", "Apple TV", "Apple TV"],
+  ["android", "com.android.htmlviewer", "HTML viewer", "HTML görüntüleyici"],
+  ["android", "com.android.printspooler", "Print service", "Yazdırma servisi"]
+];
+
+const GROUPS = {
+  en: { all: "All", xiaomi: "Xiaomi", analytics: "Analytics", google: "Google", streaming: "Streaming", android: "Android" },
+  tr: { all: "Tümü", xiaomi: "Xiaomi", analytics: "Analitik", google: "Google", streaming: "Yayın", android: "Android" }
+};
+
+const TILES = [
+  { l: "Mi TV+", b: 1, c: "#5B4B8A" },
+  { i: "tile_settings", b: 0, c: "#2B3647" },
+  { l: "Mi Music", b: 1, c: "#8A5B4B" },
+  { l: "Prime Video", b: 1, c: "#3E6E8E" },
+  { l: "Play Store", b: 0, c: "#1F6F5B" },
+  { i: "tile_gallery", b: 1, c: "#7B7A3D" },
+  { l: "Disney+", b: 1, c: "#8E3E5E" },
+  { l: "Mi Video", b: 1, c: "#2F7A74" },
+  { l: "Chromecast", b: 0, c: "#2D5FA8" },
+  { l: "Apple TV", b: 1, c: "#946C2A" },
+  { l: "Game Center", b: 1, c: "#4A5F8E" },
+  { l: "YouTube Music", b: 1, c: "#6E4A6E" }
+];
+
+const TERM = {
+  en: `<span class="w">Mi Box Debloater v<span data-version-plain>1.0.0</span></span>
+<span class="c">=== MI BOX DEBLOATER &amp; OPTIMIZER ===</span>
+Connecting to device (192.168.1.45:5555)... <span class="g">[OK]</span>
+<span class="g">Connection successful!</span>
+
+<span class="w">Packages to be removed:</span>
+  <span class="c">[Xiaomi]</span> com.mitv.tvhome.mitvplus  (<span class="g">safe</span>)
+  <span class="c">[Xiaomi]</span> com.xiaomi.mimusic2  (<span class="g">safe</span>)
+  <span class="c">[Analytics]</span> com.miui.tv.analytics  (<span class="g">safe</span>)
+
+<span class="y">3 packages will be removed. Continue? (y/n): </span>y
+
+<span class="d">-&gt;</span> com.mitv.tvhome.mitvplus... <span class="g">[DONE]</span>
+<span class="d">-&gt;</span> com.xiaomi.mimusic2... <span class="g">[DONE]</span>
+<span class="d">-&gt;</span> com.miui.tv.analytics... <span class="g">[DONE]</span>
+<span class="w">Summary: 3 removed, 0 failed, 0 skipped.</span>
+<span style="color:#C792EA">Backup saved: mibox_backup_192.168.1.45_5555_20261115_132705.json</span>
+
+<span class="w g">PROCESS COMPLETED!</span>`,
+  tr: `<span class="w">Mi Box Debloater v<span data-version-plain>1.0.0</span></span>
+<span class="c">=== MI BOX DEBLOATER &amp; OPTİMİZER ===</span>
+Cihaza bağlanılıyor (192.168.1.45:5555)... <span class="g">[OK]</span>
+<span class="g">Bağlantı başarılı!</span>
+
+<span class="w">Kaldırılacak paketler:</span>
+  <span class="c">[Xiaomi]</span> com.mitv.tvhome.mitvplus  (<span class="g">güvenli</span>)
+  <span class="c">[Xiaomi]</span> com.xiaomi.mimusic2  (<span class="g">güvenli</span>)
+  <span class="c">[Analitik]</span> com.miui.tv.analytics  (<span class="g">güvenli</span>)
+
+<span class="y">3 paket kaldırılacak. Devam edilsin mi? (e/h): </span>e
+
+<span class="d">-&gt;</span> com.mitv.tvhome.mitvplus... <span class="g">[TAMAM]</span>
+<span class="d">-&gt;</span> com.xiaomi.mimusic2... <span class="g">[TAMAM]</span>
+<span class="d">-&gt;</span> com.miui.tv.analytics... <span class="g">[TAMAM]</span>
+<span class="w">Özet: 3 kaldırıldı, 0 hata, 0 atlandı.</span>
+<span style="color:#C792EA">Yedek kaydedildi: mibox_backup_192.168.1.45_5555_20261115_132705.json</span>
+
+<span class="w g">İŞLEM TAMAMLANDI!</span>`
+};
+
+const T = {
+  en: {
+    skip: "Skip to content",
+    nav_how: "How it works", nav_features: "Features", nav_packages: "Packages", nav_faq: "FAQ",
+    star: "Star", star_gh: "Star on GitHub",
+    h1: "Get the junk off your Mi Box.",
+    sub: "Remove Mi TV+, Mi Music, analytics services and other preinstalled apps from a Windows PC in a few minutes. Everything is backed up first, and nothing system-critical can be touched.",
+    download: "Download for Windows", source: "View the source",
+    fine: "Free and open source, MIT license.",
+    demo_label: "Try it on a Mi Box home screen",
+    tv_home: "Home", tv_apps: "{n} apps",
+    tv_before: "{n} apps you didn't install", tv_after: "{n} removed, backup saved",
+    ok: "OK", undo: "Undo",
+    aria_remove: "Remove the preinstalled apps", aria_restore: "Restore the removed apps",
+    hint_before: "Press OK to remove them.", hint_after: "Press Undo to bring them back.",
+    tile_settings: "Settings", tile_gallery: "Gallery",
+    how_h: "Three steps, nothing to install",
+    s1_h: "Turn on debugging on the Mi Box",
+    s1_p: "In Settings, Device Preferences, About, tap Build seven times. Then open Developer options and switch on USB debugging or Network debugging. You'll find the IP address under Network and Internet.",
+    s2_h: "Run the tool on a PC on the same network",
+    s2_p: "Download the exe, open it, pick your language and enter the Mi Box IP address. The first time, accept the prompt that appears on the TV.",
+    s3_h: "Review the list and confirm",
+    s3_p: "You see every package before anything changes. Confirm, and the tool removes them, saves a backup and shortens the interface animations.",
+    feat_h: "Careful by design",
+    f1_t: "Backup and restore", f1_d: "A JSON backup is saved before anything is removed. One menu choice brings every package back.",
+    f2_t: "Dry run", f2_d: "See exactly what would be removed while changing nothing.",
+    f3_t: "Protected packages", f3_d: "The launcher, settings, Play Services and other system parts are skipped even if they end up on the list.",
+    f4_t: "ADB included", f4_d: "The Windows build ships with Android platform-tools. No install, no PATH to edit.",
+    f5_t: "Honest results", f5_d: "Every package shows done or failed with ADB's real message, and a log is saved to mibox_debloater.log.",
+    f6_t: "Package list export", f6_d: "Save everything installed on your device to a text file, handy for bug reports and pull requests.",
+    f7_t: "Optional dexopt", f7_d: "Compiling every app takes 10 to 30 minutes on a Mi Box, so the tool asks before it starts.",
+    f8_t: "Turkish and English", f8_d: "Pick the language at startup, or pass --lang.",
+    term_h: "What you'll see",
+    term_p: "The tool is a terminal app. This is a shortened example of its output, with a risk label for every package and a confirmation before anything is removed.",
+    cli_h: "Prefer scripting?", cli_p: "Pass options on the command line. The full list is in the README.",
+    copy: "Copy", copied: "Copied",
+    safe_h: "What it never touches",
+    safe_p1: "These stay installed no matter what the list says: <strong>the launcher, system settings, Google Play Services and the Play Store, built-in Chromecast, Google voice search, the keyboard, WebView, the remote and Bluetooth services, the system updater</strong> and the Amlogic system packages.",
+    safe_p2: "Packages are removed with <code>pm uninstall -k --user 0</code>, which affects only the current user. The system partition is untouched, and a factory reset brings everything back.",
+    pkg_h: "Everything it removes",
+    pkg_lead: "{n} packages. Only the ones actually installed on your device are listed and removed.",
+    search_ph: "Search packages",
+    th_pkg: "Package", th_what: "What it is",
+    showing: "Showing {a} of {b} packages",
+    empty: "No package matches. Clear the search to see all {n}.",
+    pkg_note: "If you use one of these apps, such as Disney+, restore it afterwards from the menu, or look at the list first with --dry-run.",
+    faq_h: "Questions",
+    q1: "Do I need to install ADB?", a1: "No. The Windows exe includes Android platform-tools. If you run main.py yourself, ADB must be in your PATH.",
+    q2: "Can I undo it?", a2: "Yes. A backup is saved before anything is removed. Choose Restore in the menu or run the tool with --restore. A factory reset also brings everything back.",
+    q3: "Windows shows a SmartScreen warning.", a3: "The exe is built with PyInstaller and isn't code-signed, which often triggers a warning. It is built by a public GitHub Actions workflow from the source in the repository, and you can build it yourself.",
+    q4: "It can't connect to my Mi Box.", a4: "Check that the PC and the Mi Box are on the same network, Network debugging is on, and you accepted the prompt on the TV. ADB's real error is shown on screen and saved to mibox_debloater.log.",
+    q5: "Does it work on other Android TV devices?", a5: "It is made for the Mi Box series. Other devices may work, but package names differ. Export the package list, review it, and run with --dry-run first.",
+    q6: "Why is dexopt optional?", a6: "It compiles every app and can take 10 to 30 minutes on a Mi Box. Most of the speed-up comes from removing bloat and shortening animations.",
+    final_h: "Did it help? Leave a star.", final_p: "Stars help other Mi Box owners find the tool.",
+    disclaimer: "Mi Box Debloater is not affiliated with Xiaomi or Google. It is provided as is, and you use it at your own risk. Windows builds include Android SDK Platform-Tools by Google.",
+    l_src: "Source", l_rel: "Releases", l_bug: "Report a bug"
+  },
+  tr: {
+    skip: "İçeriğe geç",
+    nav_how: "Nasıl çalışır", nav_features: "Özellikler", nav_packages: "Paketler", nav_faq: "SSS",
+    star: "Yıldızla", star_gh: "GitHub'da yıldızla",
+    h1: "Mi Box'ındaki gereksizleri temizle.",
+    sub: "Mi TV+, Mi Music, analitik servisleri ve diğer önceden yüklü uygulamaları bir Windows bilgisayardan birkaç dakikada kaldır. Her şey önce yedeklenir, sisteme ait kritik hiçbir şeye dokunulmaz.",
+    download: "Windows için indir", source: "Kaynak koduna bak",
+    fine: "Ücretsiz ve açık kaynak, MIT lisansı.",
+    demo_label: "Bir Mi Box ana ekranında dene",
+    tv_home: "Ana ekran", tv_apps: "{n} uygulama",
+    tv_before: "Senin yüklemediğin {n} uygulama", tv_after: "{n} kaldırıldı, yedek alındı",
+    ok: "OK", undo: "Geri al",
+    aria_remove: "Önceden yüklü uygulamaları kaldır", aria_restore: "Kaldırılan uygulamaları geri yükle",
+    hint_before: "Kaldırmak için OK'a bas.", hint_after: "Geri getirmek için Geri al'a bas.",
+    tile_settings: "Ayarlar", tile_gallery: "Galeri",
+    how_h: "Üç adım, kurulum yok",
+    s1_h: "Mi Box'ta hata ayıklamayı aç",
+    s1_p: "Ayarlar, Cihaz Tercihleri, Hakkında bölümünde Derleme'ye yedi kez bas. Sonra Geliştirici seçenekleri'ni aç ve USB hata ayıklama ya da Ağ hata ayıklamayı etkinleştir. IP adresini Ağ ve İnternet bölümünde bulursun.",
+    s2_h: "Aracı aynı ağdaki bir bilgisayarda çalıştır",
+    s2_p: "Exe'yi indir, aç, dilini seç ve Mi Box'ın IP adresini gir. İlk seferde TV'de çıkan izin isteğini onayla.",
+    s3_h: "Listeyi gör ve onayla",
+    s3_p: "Bir şey değişmeden önce tüm paketleri görürsün. Onaylarsan araç paketleri kaldırır, yedek alır ve arayüz animasyonlarını kısaltır.",
+    feat_h: "Temkinli tasarlandı",
+    f1_t: "Yedekle ve geri yükle", f1_d: "Bir şey kaldırılmadan önce JSON yedeği kaydedilir. Tek menü seçimiyle tüm paketler geri gelir.",
+    f2_t: "Deneme modu", f2_d: "Nelerin kaldırılacağını gör, hiçbir şeyi değiştirme.",
+    f3_t: "Korumalı paketler", f3_d: "Launcher, ayarlar, Play Hizmetleri ve diğer sistem parçaları listeye girse bile atlanır.",
+    f4_t: "ADB dahil", f4_d: "Windows sürümü Android platform-tools ile gelir. Kurulum yok, PATH ayarı yok.",
+    f5_t: "Dürüst sonuçlar", f5_d: "Her paket için ADB'nin gerçek mesajıyla tamam ya da hata görürsün, log mibox_debloater.log dosyasına kaydedilir.",
+    f6_t: "Paket listesini aktarma", f6_d: "Cihazındaki tüm paketleri metin dosyasına kaydet. Hata bildirimi ve pull request için çok işe yarar.",
+    f7_t: "İsteğe bağlı dexopt", f7_d: "Tüm uygulamaları derlemek Mi Box'ta 10-30 dakika sürer, bu yüzden araç başlamadan önce sorar.",
+    f8_t: "Türkçe ve İngilizce", f8_d: "Dili açılışta seç ya da --lang ile ver.",
+    term_h: "Ekranda ne göreceksin",
+    term_p: "Araç bir terminal uygulaması. Bu, çıktısının kısaltılmış bir örneği: her paket için risk etiketi var ve bir şey kaldırılmadan önce onay isteniyor.",
+    cli_h: "Betik mi yazıyorsun?", cli_p: "Seçenekleri komut satırından ver. Tam liste README'de.",
+    copy: "Kopyala", copied: "Kopyalandı",
+    safe_h: "Asla dokunmadıkları",
+    safe_p1: "Liste ne derse desin şunlar yüklü kalır: <strong>launcher, sistem ayarları, Google Play Hizmetleri ve Play Store, yerleşik Chromecast, Google sesli arama, klavye, WebView, kumanda ve Bluetooth servisleri, sistem güncelleyici</strong> ve Amlogic sistem paketleri.",
+    safe_p2: "Paketler yalnızca mevcut kullanıcıyı etkileyen <code>pm uninstall -k --user 0</code> ile kaldırılır. Sistem bölümüne dokunulmaz, fabrika ayarlarına dönmek her şeyi geri getirir.",
+    pkg_h: "Kaldırdığı her şey",
+    pkg_lead: "{n} paket. Sadece cihazında gerçekten yüklü olanlar listelenir ve kaldırılır.",
+    search_ph: "Paket ara",
+    th_pkg: "Paket", th_what: "Ne olduğu",
+    showing: "{b} paketin {a} tanesi gösteriliyor",
+    empty: "Eşleşen paket yok. Aramayı temizle, {n} paketin hepsini gör.",
+    pkg_note: "Bu uygulamalardan birini kullanıyorsan, örneğin Disney+, sonradan menüden geri yükle ya da önce --dry-run ile listeye bak.",
+    faq_h: "Sıkça sorulanlar",
+    q1: "ADB kurmam gerekiyor mu?", a1: "Hayır. Windows exe'si Android platform-tools ile gelir. main.py'yi kendin çalıştırıyorsan ADB'nin PATH'te olması gerekir.",
+    q2: "Geri alabilir miyim?", a2: "Evet. Bir şey kaldırılmadan önce yedek alınır. Menüden Geri yükle'yi seç ya da aracı --restore ile çalıştır. Fabrika ayarlarına dönmek de her şeyi geri getirir.",
+    q3: "Windows SmartScreen uyarısı veriyor.", a3: "Exe PyInstaller ile derleniyor ve kod imzalı değil, bu yüzden sık sık uyarı çıkar. Exe, depodaki kaynaktan herkese açık bir GitHub Actions workflow'u ile derlenir, istersen kendin de derleyebilirsin.",
+    q4: "Mi Box'ıma bağlanamıyor.", a4: "Bilgisayar ile Mi Box'ın aynı ağda olduğunu, Ağ hata ayıklamanın açık olduğunu ve TV'deki izni onayladığını kontrol et. ADB'nin gerçek hatası ekrana yazılır ve mibox_debloater.log dosyasına kaydedilir.",
+    q5: "Diğer Android TV cihazlarında çalışır mı?", a5: "Mi Box serisi için hazırlandı. Diğer cihazlarda çalışabilir ama paket adları farklıdır. Paket listesini aktar, incele ve önce --dry-run ile dene.",
+    q6: "Dexopt neden isteğe bağlı?", a6: "Tüm uygulamaları derler ve Mi Box'ta 10-30 dakika sürebilir. Hızlanmanın çoğu gereksizleri silmekten ve animasyonları kısaltmaktan gelir.",
+    final_h: "İşine yaradı mı? Bir yıldız bırak.", final_p: "Yıldızlar, diğer Mi Box sahiplerinin aracı bulmasına yardım eder.",
+    disclaimer: "Mi Box Debloater, Xiaomi veya Google ile bağlantılı değildir. Olduğu gibi sunulur, kullanım riski sana aittir. Windows sürümleri Google'ın Android SDK Platform-Tools paketini içerir.",
+    l_src: "Kaynak", l_rel: "Sürümler", l_bug: "Hata bildir"
+  }
+};
+
+const state = { lang: "en", removed: false, busy: false, group: "all", query: "", stars: null, version: null, downloadUrl: null };
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const t = (key, vars) => {
+  let s = (T[state.lang] && T[state.lang][key]) || T.en[key] || key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.replace("{" + k + "}", vars[k]); });
+  return s;
+};
+
+const BLOAT = TILES.filter(x => x.b).length;
+const TOTAL = TILES.length;
+
+function buildTiles() {
+  const grid = $("#tv-grid");
+  TILES.forEach(tile => {
+    const el = document.createElement("div");
+    el.className = "tile";
+    el.style.setProperty("--tile", tile.c);
+    el.dataset.b = tile.b ? "1" : "0";
+    if (tile.i) el.dataset.i18n = tile.i; else el.textContent = tile.l;
+    grid.appendChild(el);
+  });
+}
+
+function updateDemo() {
+  const ok = $("#ok");
+  ok.textContent = state.removed ? t("undo") : t("ok");
+  ok.setAttribute("aria-label", state.removed ? t("aria_restore") : t("aria_remove"));
+  $("#demo-hint").textContent = state.removed ? t("hint_after") : t("hint_before");
+  $("#tv-count").textContent = t("tv_apps", { n: state.removed ? TOTAL - BLOAT : TOTAL });
+  $("#tv-status").innerHTML = state.removed
+    ? "<b>" + t("tv_after", { n: BLOAT }) + "</b>"
+    : t("tv_before", { n: BLOAT });
+}
+
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+function flip(keep, first) {
+  keep.forEach((el, i) => {
+    const last = el.getBoundingClientRect();
+    const dx = first[i].left - last.left;
+    const dy = first[i].top - last.top;
+    if (dx || dy) {
+      el.animate(
+        [{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "none" }],
+        { duration: 520, easing: "cubic-bezier(.2,.8,.2,1)" }
+      );
+    }
+  });
+}
+
+async function toggleDemo() {
+  if (state.busy) return;
+  state.busy = true;
+  $("#ok").classList.remove("is-hint");
+  const tiles = $$(".tile", $("#tv-grid"));
+  const bloat = tiles.filter(el => el.dataset.b === "1");
+  const keep = tiles.filter(el => el.dataset.b !== "1");
+
+  if (!state.removed) {
+    if (!reduceMotion) {
+      bloat.forEach((el, i) => el.animate(
+        [{ opacity: 1, transform: "scale(1)" }, { opacity: 0, transform: "scale(.86)" }],
+        { duration: 260, delay: i * 85, fill: "forwards", easing: "ease-in" }
+      ));
+      await wait(bloat.length * 85 + 300);
+    }
+    const first = keep.map(el => el.getBoundingClientRect());
+    bloat.forEach(el => { el.getAnimations().forEach(a => a.cancel()); el.hidden = true; });
+    if (!reduceMotion) flip(keep, first);
+    state.removed = true;
+  } else {
+    const first = keep.map(el => el.getBoundingClientRect());
+    bloat.forEach(el => { el.hidden = false; });
+    if (!reduceMotion) {
+      flip(keep, first);
+      bloat.forEach((el, i) => el.animate(
+        [{ opacity: 0, transform: "scale(.86)" }, { opacity: 1, transform: "scale(1)" }],
+        { duration: 300, delay: 260 + i * 60, fill: "backwards", easing: "ease-out" }
+      ));
+      await wait(260 + bloat.length * 60 + 300);
+    }
+    state.removed = false;
+  }
+  updateDemo();
+  state.busy = false;
+}
+
+function renderChips() {
+  const wrap = $("#chips");
+  wrap.textContent = "";
+  Object.keys(GROUPS[state.lang]).forEach(key => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.dataset.group = key;
+    b.textContent = GROUPS[state.lang][key];
+    b.setAttribute("aria-pressed", String(state.group === key));
+    wrap.appendChild(b);
+  });
+}
+
+function renderPackages() {
+  const q = state.query.trim().toLowerCase();
+  const body = $("#pkg-body");
+  body.textContent = "";
+  let shown = 0;
+  PKGS.forEach(p => {
+    const desc = state.lang === "tr" ? p[3] : p[2];
+    if (state.group !== "all" && p[0] !== state.group) return;
+    if (q && p[1].toLowerCase().indexOf(q) === -1 && desc.toLowerCase().indexOf(q) === -1) return;
+    const tr = document.createElement("tr");
+    const a = document.createElement("td");
+    a.textContent = p[1];
+    const b = document.createElement("td");
+    b.textContent = desc;
+    const g = document.createElement("span");
+    g.className = "grp";
+    g.textContent = GROUPS[state.lang][p[0]];
+    b.appendChild(g);
+    tr.appendChild(a);
+    tr.appendChild(b);
+    body.appendChild(tr);
+    shown++;
+  });
+  $("#count").textContent = t("showing", { a: shown, b: PKGS.length });
+  const empty = $("#empty");
+  empty.hidden = shown !== 0;
+  empty.textContent = t("empty", { n: PKGS.length });
+}
+
+function renderTerminal() {
+  $("#term").innerHTML = TERM[state.lang];
+  $$("[data-version-plain]").forEach(el => { el.textContent = state.version ? state.version.replace(/^v/i, "") : "1.0.0"; });
+}
+
+function renderLive() {
+  $$("[data-stars]").forEach(el => {
+    el.textContent = state.stars === null ? "" : Number(state.stars).toLocaleString(state.lang === "tr" ? "tr-TR" : "en-US");
+  });
+  $$("[data-version]").forEach(el => { el.textContent = state.version ? ", " + state.version : ""; });
+  $$("[data-download]").forEach(el => { if (state.downloadUrl) el.href = state.downloadUrl; });
+  $$("[data-version-plain]").forEach(el => { el.textContent = state.version ? state.version.replace(/^v/i, "") : "1.0.0"; });
+}
+
+function applyLang(lang) {
+  state.lang = T[lang] ? lang : "en";
+  document.documentElement.lang = state.lang;
+  $$("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $$("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
+  $("#search").placeholder = t("search_ph");
+  $("#search").setAttribute("aria-label", t("search_ph"));
+  $("#pkg-lead").textContent = t("pkg_lead", { n: PKGS.length });
+  $("#cli-cmd").textContent = "Mi-Box-Debloater.exe --ip 192.168.1.45 --lang " + state.lang + " --dry-run";
+  $("#copy").textContent = t("copy");
+  renderChips();
+  renderPackages();
+  renderTerminal();
+  renderLive();
+  updateDemo();
+  try { localStorage.setItem("lang", state.lang); } catch (e) {}
+}
+
+async function loadGithub() {
+  try {
+    const r = await fetch("https://api.github.com/repos/" + REPO);
+    if (r.ok) {
+      const d = await r.json();
+      if (typeof d.stargazers_count === "number") state.stars = d.stargazers_count;
+    }
+  } catch (e) {}
+  try {
+    const r = await fetch("https://api.github.com/repos/" + REPO + "/releases/latest");
+    if (r.ok) {
+      const d = await r.json();
+      if (d.tag_name) state.version = d.tag_name;
+      const asset = (d.assets || []).find(a => /\.exe$/i.test(a.name));
+      if (asset) state.downloadUrl = asset.browser_download_url;
+    }
+  } catch (e) {}
+  renderLive();
+}
+
+function init() {
+  buildTiles();
+  let lang = null;
+  try { lang = localStorage.getItem("lang"); } catch (e) {}
+  if (!T[lang]) lang = (navigator.language || "").toLowerCase().indexOf("tr") === 0 ? "tr" : "en";
+  applyLang(lang);
+
+  $("#ok").addEventListener("click", toggleDemo);
+  $$(".seg button").forEach(b => b.addEventListener("click", () => applyLang(b.dataset.lang)));
+  $("#chips").addEventListener("click", e => {
+    const b = e.target.closest("button[data-group]");
+    if (!b) return;
+    state.group = b.dataset.group;
+    renderChips();
+    renderPackages();
+  });
+  $("#search").addEventListener("input", e => { state.query = e.target.value; renderPackages(); });
+  $("#copy").addEventListener("click", async () => {
+    const btn = $("#copy");
+    const text = $("#cli-cmd").textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = t("copied");
+    } catch (e) {
+      const range = document.createRange();
+      range.selectNodeContents($("#cli-cmd"));
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    setTimeout(() => { btn.textContent = t("copy"); }, 1600);
+  });
+  loadGithub();
+}
+
+init();
+</script>
+</body>
+</html>
