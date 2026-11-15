@@ -7,6 +7,18 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Surum / Version (orn: 1.2.0)'
+        required: true
+        default: '1.0.0'
+      prerelease:
+        description: 'On surum olarak yayinla / Mark as pre-release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -15,6 +27,43 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v4
+
+    - name: Resolve Version
+      id: ver
+      shell: bash
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+        INPUT_PRE: ${{ github.event.inputs.prerelease }}
+        EVENT: ${{ github.event_name }}
+        REF: ${{ github.ref }}
+        RUN_NUMBER: ${{ github.run_number }}
+      run: |
+        PRE=false
+        if [[ "$REF" == refs/tags/v* ]]; then
+          VERSION="${REF#refs/tags/v}"
+        elif [[ "$EVENT" == "workflow_dispatch" ]]; then
+          VERSION="${INPUT_VERSION#v}"
+          PRE="$INPUT_PRE"
+        else
+          VERSION="0.0.0-dev.${RUN_NUMBER}"
+          PRE=true
+        fi
+
+        if [[ ! "$VERSION" =~ ^[0-9A-Za-z._+-]+$ ]]; then
+          echo "Gecersiz surum / Invalid version: $VERSION"
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "tag_name=v$VERSION" >> "$GITHUB_OUTPUT"
+        echo "prerelease=$PRE" >> "$GITHUB_OUTPUT"
+        echo "Building version: $VERSION (prerelease=$PRE)"
+
+    - name: Inject Version Into Source
+      shell: bash
+      run: |
+        sed -i "s/^__version__ = .*/__version__ = \"${{ steps.ver.outputs.version }}\"/" main.py
+        grep -n "^__version__" main.py
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -28,24 +77,26 @@ jobs:
 
     - name: Build Executable
       run: |
-        pyinstaller --onefile --noconsole --name "Mi-Box-Debloater" main.py
+        pyinstaller --onefile --name "Mi-Box-Debloater" main.py
 
-    - name: Get Version
-      id: get_version
+    - name: Verify Executable Version
       shell: bash
       run: |
-        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-        else
-          echo "tag_name=v1.0.0-manual" >> $GITHUB_OUTPUT
+        OUT="$(./dist/Mi-Box-Debloater.exe --version)"
+        echo "$OUT"
+        if [[ "$OUT" != *"v${{ steps.ver.outputs.version }}"* ]]; then
+          echo "Surum eslesmiyor / Version mismatch!"
+          exit 1
         fi
+        mv dist/Mi-Box-Debloater.exe "dist/Mi-Box-Debloater-v${{ steps.ver.outputs.version }}.exe"
 
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       with:
-        files: dist/Mi-Box-Debloater.exe
-        tag_name: ${{ steps.get_version.outputs.tag_name }}
+        files: dist/Mi-Box-Debloater-v${{ steps.ver.outputs.version }}.exe
+        tag_name: ${{ steps.ver.outputs.tag_name }}
+        name: Mi Box Debloater v${{ steps.ver.outputs.version }}
         draft: false
-        prerelease: false
+        prerelease: ${{ steps.ver.outputs.prerelease == 'true' }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
