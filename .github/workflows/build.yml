@@ -75,9 +75,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install pyinstaller
 
+    - name: Download Platform Tools
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri "https://dl.google.com/android/repository/platform-tools-latest-windows.zip" -OutFile platform-tools.zip
+        Expand-Archive -Path platform-tools.zip -DestinationPath pt_extract -Force
+        New-Item -ItemType Directory -Path adb_bundle -Force | Out-Null
+        foreach ($f in "adb.exe", "AdbWinApi.dll", "AdbWinUsbApi.dll") {
+          $src = Join-Path "pt_extract/platform-tools" $f
+          if (-not (Test-Path $src)) { throw "Missing $f in platform-tools" }
+          Copy-Item $src adb_bundle
+        }
+        Get-ChildItem adb_bundle
+
     - name: Build Executable
       run: |
-        pyinstaller --onefile --name "Mi-Box-Debloater" main.py
+        pyinstaller --onefile --name "Mi-Box-Debloater" --add-data "adb_bundle/adb.exe;platform-tools" --add-data "adb_bundle/AdbWinApi.dll;platform-tools" --add-data "adb_bundle/AdbWinUsbApi.dll;platform-tools" main.py
 
     - name: Verify Executable Version
       shell: bash
