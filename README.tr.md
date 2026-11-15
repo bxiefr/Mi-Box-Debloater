@@ -4,24 +4,24 @@
 
 **Xiaomi Mi Box / Android TV için tek tıkla gereksiz uygulama temizleyici ve optimize edici. ADB kurmaya gerek yok.**
 
-[![Sürüm](https://img.shields.io/github/v/release/OWNER/REPO?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/OWNER/REPO/releases/latest)
-[![İndirme](https://img.shields.io/github/downloads/OWNER/REPO/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/OWNER/REPO/releases)
-[![Yıldız](https://img.shields.io/github/stars/OWNER/REPO?style=for-the-badge&logo=github&color=f5c542)](https://github.com/OWNER/REPO/stargazers)
-[![Fork](https://img.shields.io/github/forks/OWNER/REPO?style=for-the-badge&logo=github&color=8957e5)](https://github.com/OWNER/REPO/network/members)
+[![Sürüm](https://img.shields.io/github/v/release/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
+[![İndirme](https://img.shields.io/github/downloads/bxiefr/Mi-Box-Debloater/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/bxiefr/Mi-Box-Debloater/releases)
+[![Yıldız](https://img.shields.io/github/stars/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=f5c542)](https://github.com/bxiefr/Mi-Box-Debloater/stargazers)
+[![Fork](https://img.shields.io/github/forks/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=8957e5)](https://github.com/bxiefr/Mi-Box-Debloater/network/members)
 
-[![Derleme](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/build.yml?logo=githubactions&logoColor=white&label=build)](https://github.com/OWNER/REPO/actions/workflows/build.yml)
+[![Derleme](https://img.shields.io/github/actions/workflow/status/bxiefr/Mi-Box-Debloater/build.yml?logo=githubactions&logoColor=white&label=build)](https://github.com/bxiefr/Mi-Box-Debloater/actions/workflows/build.yml)
 [![Lisans: MIT](https://img.shields.io/badge/lisans-MIT-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/OWNER/REPO/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
 [![Android TV](https://img.shields.io/badge/Android%20TV-3DDC84?logo=android&logoColor=white)](https://www.android.com/tv/)
 [![Dil](https://img.shields.io/badge/dil-TR%20%7C%20EN-red)](README.md)
-[![Sorunlar](https://img.shields.io/github/issues/OWNER/REPO)](https://github.com/OWNER/REPO/issues)
-[![Son commit](https://img.shields.io/github/last-commit/OWNER/REPO)](https://github.com/OWNER/REPO/commits/main)
+[![Sorunlar](https://img.shields.io/github/issues/bxiefr/Mi-Box-Debloater)](https://github.com/bxiefr/Mi-Box-Debloater/issues)
+[![Son commit](https://img.shields.io/github/last-commit/bxiefr/Mi-Box-Debloater)](https://github.com/bxiefr/Mi-Box-Debloater/commits/main)
 [![PR'lar açık](https://img.shields.io/badge/PR'lar-a%C3%A7%C4%B1k-brightgreen)](#-katkıda-bulunma)
 
 [English](README.md) · **Türkçe**
 
-[⬇️ **İndir**](https://github.com/OWNER/REPO/releases/latest) · [🐛 Hata bildir](https://github.com/OWNER/REPO/issues) · [💡 Özellik iste](https://github.com/OWNER/REPO/issues)
+[⬇️ **İndir**](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) · [🐛 Hata bildir](https://github.com/bxiefr/Mi-Box-Debloater/issues) · [💡 Özellik iste](https://github.com/bxiefr/Mi-Box-Debloater/issues)
 
 <img src="docs/screenshot.png" alt="Mi Box Debloater ekran görüntüsü" width="620">
 
@@ -52,7 +52,7 @@ Mi Box, hiç istemediğin uygulamalarla geliyor: Mi TV+, Mi Music, analitik serv
    Ayarlar → Cihaz Tercihleri → Hakkında → *Derleme* üzerine 7 kez bas, sonra Ayarlar → Cihaz Tercihleri → Geliştirici seçenekleri → **USB hata ayıklama / Ağ hata ayıklama** seçeneğini aç.
 2. **Mi Box'ın IP adresini bul**
    Ayarlar → Ağ ve İnternet → bağlı olduğun Wi-Fi/Ethernet bağlantısı.
-3. [Son sürümden](https://github.com/OWNER/REPO/releases/latest) `Mi-Box-Debloater-vX.Y.Z.exe` dosyasını indir ve aynı ağdaki bir bilgisayarda çalıştır.
+3. [Son sürümden](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) `Mi-Box-Debloater-vX.Y.Z.exe` dosyasını indir ve aynı ağdaki bir bilgisayarda çalıştır.
 4. Dilini seç, IP'yi gir ve **1) Temizle ve optimize et** seçeneğini seç.
 5. İlk seferde TV ekranındaki hata ayıklama iznini onayla ("Her zaman izin ver").
 
@@ -157,6 +157,6 @@ Pull request'ler açıktır. Paket eklemek için `main.py` içindeki `PACKAGES` 
 
 ### ⭐ Mi Box'ını kurtardıysa, bir yıldız bırakmayı unutma!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OWNER/REPO&type=Date)](https://star-history.com/#OWNER/REPO&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=bxiefr/Mi-Box-Debloater&type=Date)](https://star-history.com/#bxiefr/Mi-Box-Debloater&Date)
 
 </div>
