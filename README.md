@@ -4,24 +4,24 @@
 
 **One-click debloater & optimizer for Xiaomi Mi Box / Android TV. No ADB install needed.**
 
-[![Release](https://img.shields.io/github/v/release/OWNER/REPO?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/OWNER/REPO/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/OWNER/REPO/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/OWNER/REPO/releases)
-[![Stars](https://img.shields.io/github/stars/OWNER/REPO?style=for-the-badge&logo=github&color=f5c542)](https://github.com/OWNER/REPO/stargazers)
-[![Forks](https://img.shields.io/github/forks/OWNER/REPO?style=for-the-badge&logo=github&color=8957e5)](https://github.com/OWNER/REPO/network/members)
+[![Release](https://img.shields.io/github/v/release/OWNER/REPO?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/OWNER/REPO/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/bxiefr/Mi-Box-Debloater/releases)
+[![Stars](https://img.shields.io/github/stars/OWNER/REPO?style=for-the-badge&logo=github&color=f5c542)](https://github.com/bxiefr/Mi-Box-Debloater/stargazers)
+[![Forks](https://img.shields.io/github/forks/OWNER/REPO?style=for-the-badge&logo=github&color=8957e5)](https://github.com/bxiefr/Mi-Box-Debloater/network/members)
 
-[![Build](https://img.shields.io/github/actions/workflow/status/OWNER/REPO/build.yml?logo=githubactions&logoColor=white&label=build)](https://github.com/OWNER/REPO/actions/workflows/build.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/bxiefr/Mi-Box-Debloater/build.yml?logo=githubactions&logoColor=white&label=build)](https://github.com/bxiefr/Mi-Box-Debloater/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
-[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/OWNER/REPO/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
 [![Android TV](https://img.shields.io/badge/Android%20TV-3DDC84?logo=android&logoColor=white)](https://www.android.com/tv/)
 [![Language](https://img.shields.io/badge/language-TR%20%7C%20EN-red)](README.tr.md)
-[![Issues](https://img.shields.io/github/issues/OWNER/REPO)](https://github.com/OWNER/REPO/issues)
-[![Last commit](https://img.shields.io/github/last-commit/OWNER/REPO)](https://github.com/OWNER/REPO/commits/main)
+[![Issues](https://img.shields.io/github/issues/bxiefr/Mi-Box-Debloater)](https://github.com/bxiefr/Mi-Box-Debloater/issues)
+[![Last commit](https://img.shields.io/github/last-commit/bxiefr/Mi-Box-Debloater)](https://github.com/bxiefr/Mi-Box-Debloater/commits/main)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](#-contributing)
 
 **English** · [Türkçe](README.tr.md)
 
-[⬇️ **Download**](https://github.com/OWNER/REPO/releases/latest) · [🐛 Report a bug](https://github.com/OWNER/REPO/issues) · [💡 Request a feature](https://github.com/OWNER/REPO/issues)
+[⬇️ **Download**](https://github.com/OWNER/REPO/releases/latest) · [🐛 Report a bug](https://github.com/OWNER/REPO/issues) · [💡 Request a feature](https://github.com/bxiefr/Mi-Box-Debloater/issues)
 
 <img src="docs/screenshot.png" alt="Mi Box Debloater screenshot" width="620">
 
