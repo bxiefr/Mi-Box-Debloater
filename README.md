@@ -4,10 +4,10 @@
 
 **One-click debloater & optimizer for Xiaomi Mi Box / Android TV. No ADB install needed.**
 
-[![Release](https://img.shields.io/github/v/release/OWNER/REPO?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/OWNER/REPO/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/bxiefr/Mi-Box-Debloater/releases)
-[![Stars](https://img.shields.io/github/stars/OWNER/REPO?style=for-the-badge&logo=github&color=f5c542)](https://github.com/bxiefr/Mi-Box-Debloater/stargazers)
-[![Forks](https://img.shields.io/github/forks/OWNER/REPO?style=for-the-badge&logo=github&color=8957e5)](https://github.com/bxiefr/Mi-Box-Debloater/network/members)
+[![Release](https://img.shields.io/github/v/release/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=2ea44f)](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/bxiefr/Mi-Box-Debloater/total?style=for-the-badge&logo=windows&color=0078D6)](https://github.com/bxiefr/Mi-Box-Debloater/releases)
+[![Stars](https://img.shields.io/github/stars/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=f5c542)](https://github.com/bxiefr/Mi-Box-Debloater/stargazers)
+[![Forks](https://img.shields.io/github/forks/bxiefr/Mi-Box-Debloater?style=for-the-badge&logo=github&color=8957e5)](https://github.com/bxiefr/Mi-Box-Debloater/network/members)
 
 [![Build](https://img.shields.io/github/actions/workflow/status/bxiefr/Mi-Box-Debloater/build.yml?logo=githubactions&logoColor=white&label=build)](https://github.com/bxiefr/Mi-Box-Debloater/actions/workflows/build.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
@@ -21,7 +21,7 @@
 
 **English** · [Türkçe](README.tr.md)
 
-[⬇️ **Download**](https://github.com/OWNER/REPO/releases/latest) · [🐛 Report a bug](https://github.com/OWNER/REPO/issues) · [💡 Request a feature](https://github.com/bxiefr/Mi-Box-Debloater/issues)
+[⬇️ **Download**](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) · [🐛 Report a bug](https://github.com/bxiefr/Mi-Box-Debloater/issues) · [💡 Request a feature](https://github.com/bxiefr/Mi-Box-Debloater/issues)
 
 <img src="docs/screenshot.png" alt="Mi Box Debloater screenshot" width="620">
 
@@ -52,7 +52,7 @@ Mi Box ships with apps you never asked for: Mi TV+, Mi Music, analytics services
    Settings → Device Preferences → About → tap *Build* 7 times, then Settings → Device Preferences → Developer options → turn on **USB debugging / Network debugging**.
 2. **Find the Mi Box IP address**
    Settings → Network & Internet → your Wi-Fi/Ethernet connection.
-3. **Download** `Mi-Box-Debloater-vX.Y.Z.exe` from the [latest release](https://github.com/OWNER/REPO/releases/latest) and run it on a PC in the same network.
+3. **Download** `Mi-Box-Debloater-vX.Y.Z.exe` from the [latest release](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) and run it on a PC in the same network.
 4. Pick your language, enter the IP, and choose **1) Debloat and optimize**.
 5. The first time, accept the debugging prompt on your TV ("Always allow").
 
@@ -157,6 +157,6 @@ Released under the [MIT License](LICENSE). Windows builds bundle Android SDK Pla
 
 ### ⭐ If this saved your Mi Box, please leave a star!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=OWNER/REPO&type=Date)](https://star-history.com/#OWNER/REPO&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=bxiefr/Mi-Box-Debloater&type=Date)](https://star-history.com/#bxiefr/Mi-Box-Debloater&Date)
 
 </div>
