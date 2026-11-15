@@ -52,6 +52,7 @@ LANGS = {
         "connected": "Bağlantı başarılı!",
         "unauthorized": "Cihaz yetkilendirilmemiş. TV ekranındaki USB/Ağ hata ayıklama izin penceresini onaylayın.",
         "conn_error": "Bağlantı kurulamadı! IP adresini ve Ağ Hata Ayıklama ayarını kontrol edin.",
+        "log_hint": "Ayrıntılar için log dosyasına bakın: {file}",
         "scanning": "Yüklü paketler taranıyor...",
         "plan_header": "Kaldırılacak paketler:",
         "plan_empty": "Kaldırılacak paket bulunamadı (hepsi zaten temiz).",
@@ -94,6 +95,7 @@ LANGS = {
         "connected": "Connection successful!",
         "unauthorized": "Device not authorized. Accept the debugging prompt on the TV screen.",
         "conn_error": "Connection failed! Check the IP address and Network Debugging setting.",
+        "log_hint": "See the log file for details: {file}",
         "scanning": "Scanning installed packages...",
         "plan_header": "Packages to be removed:",
         "plan_empty": "No packages to remove (everything is already clean).",
@@ -182,6 +184,7 @@ class Spinner:
 
     def __init__(self, text):
         self.text = text
+        self.ok = True
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._spin, daemon=True)
 
@@ -200,7 +203,8 @@ class Spinner:
     def __exit__(self, *_):
         self._stop.set()
         self._thread.join()
-        sys.stdout.write(f"\r{self.text} [OK]     \n")
+        mark = "[OK]" if self.ok else "[FAIL]"
+        sys.stdout.write(f"\r{self.text} {mark}     \n")
         sys.stdout.flush()
 
 
@@ -431,15 +435,28 @@ def connect(con, ip_arg):
 
     con.say("connecting", target=target)
     adb(["start-server"])
-    with Spinner(con.t("connecting", target=target)):
-        adb(["connect", target], timeout=15)
-        state = device_state(target)
+    adb(["disconnect", target], timeout=10)
+    state = None
+    message = ""
+    with Spinner(con.t("connecting", target=target)) as spin:
+        for _ in range(3):
+            _, message = adb(["connect", target], timeout=20)
+            for _ in range(10):
+                state = device_state(target)
+                if state in ("device", "unauthorized"):
+                    break
+                time.sleep(1)
+            if state in ("device", "unauthorized"):
+                break
+        spin.ok = state == "device"
 
     if state == "unauthorized":
         con.say("unauthorized")
         return None
     if state != "device":
         con.say("conn_error")
+        print(f"ADB: {message or '-'} [{state or '-'}]")
+        con.say("log_hint", file=LOG_FILE)
         return None
 
     con.say("connected")
