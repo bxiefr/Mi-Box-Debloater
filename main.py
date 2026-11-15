@@ -25,6 +25,19 @@ ANIM_KEYS = (
     "animator_duration_scale",
 )
 
+def locate_adb():
+    base = getattr(sys, "_MEIPASS", None)
+    if base:
+        name = "adb.exe" if os.name == "nt" else "adb"
+        bundled = Path(base) / "platform-tools" / name
+        if bundled.is_file():
+            os.environ["ANDROID_ADB_SERVER_PORT"] = "5038"
+            return str(bundled), True
+    return shutil.which("adb"), False
+
+
+ADB_PATH, ADB_BUNDLED = locate_adb()
+
 LANGS = {
     "tr": {
         "lang_name": "Türkçe",
@@ -206,7 +219,7 @@ def clear_screen():
 
 
 def adb(args, serial=None, timeout=30):
-    cmd = ["adb"]
+    cmd = [ADB_PATH or "adb"]
     if serial:
         cmd += ["-s", serial]
     cmd += list(args)
@@ -406,7 +419,7 @@ def do_restore(con, serial, args):
 
 
 def connect(con, ip_arg):
-    if shutil.which("adb") is None:
+    if ADB_PATH is None:
         con.say("adb_missing")
         return None
 
@@ -515,3 +528,6 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print()
         sys.exit(130)
+    finally:
+        if ADB_BUNDLED:
+            adb(["kill-server"], timeout=10)
