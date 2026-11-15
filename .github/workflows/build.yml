@@ -2,6 +2,8 @@ name: Build and Release Mi Box Debloater
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
   workflow_dispatch:
@@ -28,9 +30,22 @@ jobs:
       run: |
         pyinstaller --onefile --noconsole --name "Mi-Box-Debloater" main.py
 
+    - name: Get Version
+      id: get_version
+      shell: bash
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          echo "tag_name=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        else
+          echo "tag_name=v1.0.0-manual" >> $GITHUB_OUTPUT
+        fi
+
     - name: Upload Release Asset
       uses: softprops/action-gh-release@v2
       with:
         files: dist/Mi-Box-Debloater.exe
+        tag_name: ${{ steps.get_version.outputs.tag_name }}
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
