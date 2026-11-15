@@ -19,6 +19,7 @@ LOG_FILE = "mibox_debloater.log"
 BACKUP_PREFIX = "mibox_backup_"
 EXPORT_PREFIX = "mibox_packages_"
 DEFAULT_ADB_PORT = 5555
+DEXOPT_TIMEOUT = 1800
 
 ANIM_KEYS = (
     "window_animation_scale",
@@ -110,7 +111,10 @@ LANGS = {
         "summary_restore": "Özet: {ok} geri yüklendi, {fail} hata.",
         "opt_anim": "Arayüz animasyonları hızlandırılıyor ({scale}x)...",
         "opt_dex": "Sistem paketleri optimize ediliyor (dexopt)...",
-        "dex_slow": "Bu işlem birkaç dakika sürebilir.",
+        "dex_slow": "Bu işlem 10-30 dakika sürebilir, cihazı kapatmayın.",
+        "dex_confirm": "Dexopt de yapılsın mı? (uzun sürer) (e/h): ",
+        "dex_done": "Dexopt tamamlandı ({time}).",
+        "dex_timeout": "Dexopt süre sınırını aştı. İşlem cihazda sürüyor olabilir, bu yüzden yeniden başlatma yapılmayacak.",
         "restore_none": "Geri yüklenecek yedek dosyası bulunamadı.",
         "restore_using": "Yedek kullanılıyor: {file}",
         "restore_start": "Paketler geri yükleniyor...",
@@ -157,7 +161,10 @@ LANGS = {
         "summary_restore": "Summary: {ok} restored, {fail} failed.",
         "opt_anim": "Speeding up UI animations ({scale}x)...",
         "opt_dex": "Optimizing system packages (dexopt)...",
-        "dex_slow": "This may take a few minutes.",
+        "dex_slow": "This may take 10-30 minutes, do not power off the device.",
+        "dex_confirm": "Run dexopt too? (takes a long time) (y/n): ",
+        "dex_done": "Dexopt finished ({time}).",
+        "dex_timeout": "Dexopt exceeded the time limit. It may still be running on the device, so no reboot will be done.",
         "restore_none": "No backup file found to restore.",
         "restore_using": "Using backup: {file}",
         "restore_start": "Restoring packages...",
@@ -272,19 +279,27 @@ class Console:
         return input(paint(self.t(key, **kw), YELLOW))
 
 
+def format_elapsed(seconds):
+    seconds = int(seconds)
+    return f"{seconds // 60:02d}:{seconds % 60:02d}"
+
+
 class Spinner:
     FRAMES = "|/-\\"
 
-    def __init__(self, text):
+    def __init__(self, text, show_time=False):
         self.text = text
         self.ok = True
+        self.show_time = show_time
+        self._start = time.time()
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._spin, daemon=True)
 
     def _spin(self):
         i = 0
         while not self._stop.is_set():
-            sys.stdout.write(f"\r{self.text} {paint(self.FRAMES[i % 4], CYAN)}")
+            clock = f" {format_elapsed(time.time() - self._start)}" if self.show_time else ""
+            sys.stdout.write(f"\r{self.text}{clock} {paint(self.FRAMES[i % 4], CYAN)}")
             sys.stdout.flush()
             time.sleep(0.1)
             i += 1
@@ -432,7 +447,7 @@ def do_debloat(con, serial, args):
 
     if not plan:
         con.say("plan_empty", GREEN)
-        return
+        return "empty"
 
     con.say()
     con.say("plan_header", BOLD)
@@ -446,7 +461,7 @@ def do_debloat(con, serial, args):
         con.say("dry_notice", YELLOW)
     elif not args.yes and not ask_yes(con, "confirm", n=len(plan)):
         con.say("aborted", RED)
-        return
+        return "aborted"
 
     backup = {
         "version": VERSION,
@@ -478,7 +493,7 @@ def do_debloat(con, serial, args):
     con.say("summary", BOLD, ok=ok, fail=fail, skip=skipped)
 
     if args.dry_run:
-        return
+        return "dry"
 
     if backup["removed"]:
         stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -492,11 +507,29 @@ def do_debloat(con, serial, args):
         for key in ANIM_KEYS:
             put_setting(serial, key, args.anim_scale)
 
+    run_dex = args.dexopt
+    if not run_dex and not args.no_optimize and not args.yes:
+        con.say()
+        run_dex = ask_yes(con, "dex_confirm")
+
+    if run_dex:
         con.say()
         con.say("opt_dex", BLUE)
         con.say("dex_slow", GRAY)
-        with Spinner("..."):
-            adb(["shell", "cmd", "package", "bg-dexopt-job"], serial, timeout=900)
+        started = time.time()
+        with Spinner("...", show_time=True) as spin:
+            rc, _ = adb(
+                ["shell", "cmd", "package", "bg-dexopt-job"],
+                serial,
+                timeout=DEXOPT_TIMEOUT,
+            )
+            spin.ok = rc != 124
+        if rc == 124:
+            con.say("dex_timeout", YELLOW)
+            return "dex_timeout"
+        con.say("dex_done", GREEN, time=format_elapsed(time.time() - started))
+
+    return "done"
 
 
 def find_latest_backup(serial, explicit):
@@ -636,6 +669,7 @@ def parse_args():
     p.add_argument("--backup-file", help="Geri yukleme icin yedek dosyasi")
     p.add_argument("--safe-only", action="store_true", help="Sadece 'guvenli' paketleri kaldir")
     p.add_argument("--no-optimize", action="store_true", help="Animasyon/dexopt atla")
+    p.add_argument("--dexopt", action="store_true", help="Dexopt calistir (uzun surer) / run dexopt (slow)")
     p.add_argument("--anim-scale", default="0.5", help="Animasyon olcegi (varsayilan 0.5)")
     p.add_argument("--no-reboot", action="store_true", help="Sonunda yeniden baslatma")
     p.add_argument("-y", "--yes", action="store_true", help="Onay sorma / no prompts")
@@ -679,16 +713,18 @@ def main():
     clear_screen()
     show_header(con)
 
+    result = None
     if mode == "restore":
         do_restore(con, serial, args)
     elif mode == "export":
         do_export(con, serial)
     else:
-        do_debloat(con, serial, args)
+        result = do_debloat(con, serial, args)
 
-    con.say()
-    con.say("success", BOLD + GREEN)
-    if not args.dry_run and not args.no_reboot and mode == "debloat":
+    if result != "aborted":
+        con.say()
+        con.say("success", BOLD + GREEN)
+    if result == "done" and not args.no_reboot:
         con.say("rebooting", YELLOW)
         adb(["reboot"], serial)
 
