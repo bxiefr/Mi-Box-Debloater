@@ -39,7 +39,7 @@ Mi Box ships with apps you never asked for: Mi TV+, Mi Music, analytics services
 - 💾 **Automatic backup & restore**: undo everything with a single menu choice
 - 🛡️ **Protected packages**: launcher, settings, Play Services, Chromecast, voice search, keyboard and system components can never be removed
 - 🔍 **Dry-run mode**: see exactly what would be removed before anything changes
-- ✅ **Confirmation step** with a risk label (safe / caution) for every package
+- ✅ **Confirmation step** with a label for every package, and **separate questions for apps you may actually use** (Netflix, Prime Video, Disney+ and other streaming apps)
 - ⚡ **Faster UI**: animation speed tuning, optional dexopt
 - 📦 **Package list export**: dump the packages on your device to a file
 - 📡 **ADB included**: the Windows build ships with platform-tools, nothing to install or add to PATH
@@ -72,7 +72,8 @@ Mi-Box-Debloater-v1.0.0.exe --ip 192.168.1.45 --lang en --dry-run
 | `--restore` | Restore packages from the latest backup |
 | `--backup-file FILE` | Use a specific backup file for `--restore` |
 | `--export-packages` | Save the device package list to a text file |
-| `--safe-only` | Only remove packages labeled *safe* |
+| `--safe-only` | Only remove packages labeled *safe* (skips the optional streaming apps) |
+| `--include-optional` | Remove the optional streaming apps without asking |
 | `--no-optimize` | Skip animation tuning and dexopt |
 | `--dexopt` | Run dexopt without asking (takes 10-30 minutes) |
 | `--anim-scale N` | Animation scale, default `0.5` |
@@ -99,16 +100,23 @@ Mi-Box-Debloater-v1.0.0.exe --ip 192.168.1.45 --lang en --dry-run
 | Google | `com.google.android.syncadapters.calendar`, `...contacts` | Calendar / contacts sync |
 | Google | `com.google.android.videos`, `...music`, `...play.games` | Play Movies, Play Music, Play Games |
 | Google | `com.google.android.youtube.tvmusic` | YouTube Music TV |
-| Streaming | `com.amazon.amazonvideo.livingroom` | Prime Video |
-| Streaming | `com.disney.disneyplus` | Disney+ |
-| Streaming | `com.apple.atve.androidtv.appletv` | Apple TV |
+| Streaming | `com.amazon.amazonvideo.livingroom` | Prime Video (asked first) |
+| Streaming | `com.disney.disneyplus` | Disney+ (asked first) |
+| Streaming | `com.apple.atve.androidtv.appletv` | Apple TV (asked first) |
+| Streaming | `com.netflix.ninja` | Netflix (asked first) |
+| Streaming | `com.exxen.android` | Exxen (asked first) |
+| Streaming | `com.iqiyi.i18n.tv` | iQIYI (asked first) |
+| Streaming | `com.turkcell.ott` | TV+ by Turkcell (asked first) |
+| Streaming | `com.digiturk.iq.mobil` | Digiturk İQ (asked first) |
 | Android | `com.android.htmlviewer`, `com.android.printspooler` | HTML viewer, print service |
 
-Only packages actually installed on your device are listed and removed. **If you use one of these apps (for example Disney+), remove it from the list before running.**
+Only packages actually installed on your device are listed and removed.
+
+**Streaming apps are optional.** Not everyone sees Netflix or Disney+ as bloat, so the tool asks about each one separately and pressing ENTER keeps the app. With `-y` they are skipped unless you also pass `--include-optional`.
 
 ## 🛡️ Safety
 
-- Packages are removed with `pm uninstall -k --user 0`: they are removed **for the current user only**. The system partition is untouched and a factory reset brings everything back.
+- Packages are removed with `pm uninstall -k --user 0`: they are removed **for the current user only**. The system partition is untouched and a factory reset brings back the system apps. Apps you installed yourself (for example Exxen or iQIYI) may need to be reinstalled from the Play Store after a restore, and the tool warns you before removing them.
 - Before removing anything, a JSON backup is saved next to the exe. Choose **2) Restore** to bring packages back.
 - Critical packages (launcher, settings, Google Play Services, Chromecast, voice search, keyboard, WebView, Amlogic system packages and more) are protected and skipped even if they end up in the list.
 - Use `--dry-run` first if you are unsure.
