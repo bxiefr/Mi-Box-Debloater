@@ -277,6 +277,13 @@ code,kbd{font-family:var(--mono);font-size:.88em}
 .pkgs td:first-child{font-family:var(--mono);font-size:13.5px;word-break:break-all;width:46%}
 .pkgs .grp{display:inline-block;margin-left:10px;font-size:13px;color:var(--ink-2)}
 .pkgs .opt{display:inline-block;margin-left:8px;font-size:13px;font-weight:600;color:var(--accent-text)}
+.shotblock{margin-top:clamp(48px,6vw,72px)}
+.shotblock h3{margin:0;font-size:24px;font-weight:700;font-stretch:88%;letter-spacing:-.015em}
+.shot{margin:20px 0 0}
+.shot__scroll{background:#0C0C0C;border-radius:16px;box-shadow:var(--shadow);overflow-x:auto}
+.shot__scroll a{display:block}
+.shot__scroll img{display:block;width:100%;min-width:820px;height:auto}
+.shot figcaption{margin-top:14px;color:var(--ink-2);font-size:15px;max-width:70ch}
 @media (max-width:640px){
   .pkgs thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .pkgs,.pkgs tbody,.pkgs tr,.pkgs td{display:block;width:auto}
@@ -453,6 +460,17 @@ code,kbd{font-family:var(--mono);font-size:.88em}
           <button type="button" id="copy" data-i18n="copy">Copy</button>
         </div>
       </div>
+    </div>
+    <div class="container shotblock">
+      <h3 data-i18n="shot_h">A real run on a Mi Box</h3>
+      <figure class="shot">
+        <div class="shot__scroll" tabindex="0" role="region" aria-labelledby="shot-cap">
+          <a href="docs/screenshot.png" target="_blank" rel="noopener">
+            <img src="docs/screenshot.png" width="1624" height="592" loading="lazy" decoding="async" data-i18n-alt="shot_alt" alt="Terminal output of Mi Box Debloater: optional streaming apps are asked about one by one, five are removed, a backup is saved and dexopt starts.">
+          </a>
+        </div>
+        <figcaption id="shot-cap" data-i18n="shot_cap">Output from a real run, with the Turkish interface. Five optional apps were chosen one by one, removed after a final confirmation, and a backup was saved. Click the image to open it full size.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -675,6 +693,9 @@ const T = {
     search_ph: "Search packages",
     th_pkg: "Package", th_what: "What it is",
     opt_tag: "asked first",
+    shot_h: "A real run on a Mi Box",
+    shot_cap: "Output from a real run, with the Turkish interface. Five optional apps were chosen one by one, removed after a final confirmation, and a backup was saved. Click the image to open it full size.",
+    shot_alt: "Terminal output of Mi Box Debloater: optional streaming apps are asked about one by one, five are removed, a backup is saved and dexopt starts.",
     showing: "Showing {a} of {b} packages",
     empty: "No package matches. Clear the search to see all {n}.",
     pkg_note: "Streaming apps are optional. Not everyone sees Netflix or Disney+ as bloat, so the tool asks about each one and pressing ENTER keeps it.",
@@ -732,6 +753,9 @@ const T = {
     search_ph: "Paket ara",
     th_pkg: "Paket", th_what: "Ne olduğu",
     opt_tag: "önce sorulur",
+    shot_h: "Gerçek bir Mi Box'ta çalışması",
+    shot_cap: "Türkçe arayüzle gerçek bir çalıştırmanın çıktısı. Beş isteğe bağlı uygulama tek tek seçildi, son onaydan sonra kaldırıldı ve yedek kaydedildi. Tam boyutta açmak için görsele tıkla.",
+    shot_alt: "Mi Box Debloater terminal çıktısı: isteğe bağlı yayın uygulamaları tek tek soruluyor, beşi kaldırılıyor, yedek kaydediliyor ve dexopt başlıyor.",
     showing: "{b} paketin {a} tanesi gösteriliyor",
     empty: "Eşleşen paket yok. Aramayı temizle, {n} paketin hepsini gör.",
     pkg_note: "Yayın uygulamaları isteğe bağlıdır. Herkes Netflix'i ya da Disney+'ı bloat olarak görmez, bu yüzden araç her biri için sorar ve ENTER'a basarsan uygulama kalır.",
@@ -906,6 +930,7 @@ function applyLang(lang) {
   document.documentElement.lang = state.lang;
   $$("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
   $$("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  $$("[data-i18n-alt]").forEach(el => { el.alt = t(el.dataset.i18nAlt); });
   $$(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang)));
   $("#search").placeholder = t("search_ph");
   $("#search").setAttribute("aria-label", t("search_ph"));
