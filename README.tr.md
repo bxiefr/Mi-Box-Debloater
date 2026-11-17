@@ -23,7 +23,7 @@
 
 [⬇️ **İndir**](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) · [🐛 Hata bildir](https://github.com/bxiefr/Mi-Box-Debloater/issues) · [💡 Özellik iste](https://github.com/bxiefr/Mi-Box-Debloater/issues)
 
-<img src="docs/screenshot.png" alt="Mi Box Debloater ekran görüntüsü" width="620">
+<img src="docs/screenshot.png" alt="Mi Box Debloater ekran görüntüsü" width="860">
 
 </div>
 
