@@ -94,10 +94,17 @@ LANGS = {
         "conn_error": "Bağlantı kurulamadı! IP adresini ve Ağ Hata Ayıklama ayarını kontrol edin.",
         "log_hint": "Ayrıntılar için log dosyasına bakın: {file}",
         "scanning": "Yüklü paketler taranıyor...",
-        "plan_header": "Kaldırılacak paketler:",
+        "plan_header": "Bulunan paketler:",
         "plan_empty": "Kaldırılacak paket bulunamadı (hepsi zaten temiz).",
         "risk_safe": "güvenli",
         "risk_caution": "dikkat",
+        "risk_optional": "isteğe bağlı",
+        "opt_header": "Bu uygulamalar herkes için bloat olmayabilir. Her biri için ayrıca soruluyor (sadece ENTER = hayır):",
+        "opt_ask": "{name} ({pkg}) kaldırılsın mı? (e/h): ",
+        "opt_ask_user": "{name} ({pkg}) kaldırılsın mı? Bunu sonradan sen yüklemişsin, yedekten geri gelmeyebilir, gerekirse Play Store'dan tekrar kurman gerekir. (e/h): ",
+        "opt_skipped": "{n} isteğe bağlı uygulama atlandı (kaldırmak için --include-optional kullan).",
+        "nothing_selected": "Hiçbir paket seçilmedi.",
+        "pkg_reinstall": "[PLAY STORE] Sonradan yüklenmişti, Play Store'dan tekrar kur",
         "skipped_protected": "Korumalı paket atlandı: {pkg}",
         "confirm": "{n} paket kaldırılacak. Devam edilsin mi? (e/h): ",
         "yes_chars": "eEyY",
@@ -108,7 +115,7 @@ LANGS = {
         "pkg_fail": "[HATA] {reason}",
         "pkg_dry": "[DENEME] kaldırılmadı",
         "summary": "Özet: {ok} kaldırıldı, {fail} hata, {skip} atlandı.",
-        "summary_restore": "Özet: {ok} geri yüklendi, {fail} hata.",
+        "summary_restore": "Özet: {ok} geri yüklendi, {fail} hata, {manual} uygulama Play Store'dan tekrar kurulmalı.",
         "opt_anim": "Arayüz animasyonları hızlandırılıyor ({scale}x)...",
         "opt_dex": "Sistem paketleri optimize ediliyor (dexopt)...",
         "dex_slow": "Bu işlem 10-30 dakika sürebilir, cihazı kapatmayın.",
@@ -144,10 +151,17 @@ LANGS = {
         "conn_error": "Connection failed! Check the IP address and Network Debugging setting.",
         "log_hint": "See the log file for details: {file}",
         "scanning": "Scanning installed packages...",
-        "plan_header": "Packages to be removed:",
+        "plan_header": "Packages found:",
         "plan_empty": "No packages to remove (everything is already clean).",
         "risk_safe": "safe",
         "risk_caution": "caution",
+        "risk_optional": "optional",
+        "opt_header": "These apps may not be bloat for you. You are asked about each one (just ENTER = no):",
+        "opt_ask": "Remove {name} ({pkg})? (y/n): ",
+        "opt_ask_user": "Remove {name} ({pkg})? You installed it yourself, so restore may not bring it back and you may need to reinstall it from the Play Store. (y/n): ",
+        "opt_skipped": "{n} optional apps skipped (use --include-optional to remove them).",
+        "nothing_selected": "No packages selected.",
+        "pkg_reinstall": "[PLAY STORE] You installed it yourself, reinstall it from the Play Store",
         "skipped_protected": "Protected package skipped: {pkg}",
         "confirm": "{n} packages will be removed. Continue? (y/n): ",
         "yes_chars": "yY",
@@ -158,7 +172,7 @@ LANGS = {
         "pkg_fail": "[FAIL] {reason}",
         "pkg_dry": "[DRY-RUN] not removed",
         "summary": "Summary: {ok} removed, {fail} failed, {skip} skipped.",
-        "summary_restore": "Summary: {ok} restored, {fail} failed.",
+        "summary_restore": "Summary: {ok} restored, {fail} failed, {manual} apps need a reinstall from the Play Store.",
         "opt_anim": "Speeding up UI animations ({scale}x)...",
         "opt_dex": "Optimizing system packages (dexopt)...",
         "dex_slow": "This may take 10-30 minutes, do not power off the device.",
@@ -193,7 +207,7 @@ PACKAGES = {
         ("com.xiaomi.mitv.mediaexplorer", "safe"),
         ("com.xiaomo.tv.milegal", "safe"),
     ],
-    "Telemetri": [
+    "Analytics": [
         ("com.miui.tv.analytics", "safe"),
         ("com.xiaomi.statistic", "safe"),
     ],
@@ -208,9 +222,14 @@ PACKAGES = {
         ("com.google.android.youtube.tvmusic", "safe"),
     ],
     "Streaming": [
-        ("com.amazon.amazonvideo.livingroom", "safe"),
-        ("com.disney.disneyplus", "safe"),
-        ("com.apple.atve.androidtv.appletv", "safe"),
+        ("com.amazon.amazonvideo.livingroom", "optional"),
+        ("com.disney.disneyplus", "optional"),
+        ("com.apple.atve.androidtv.appletv", "optional"),
+        ("com.netflix.ninja", "optional"),
+        ("com.exxen.android", "optional"),
+        ("com.iqiyi.i18n.tv", "optional"),
+        ("com.turkcell.ott", "optional"),
+        ("com.digiturk.iq.mobil", "optional"),
     ],
     "Android": [
         ("com.android.htmlviewer", "safe"),
@@ -249,6 +268,7 @@ PROTECTED = {
     "com.android.providers.media",
     "com.android.providers.downloads",
     "com.android.shell",
+    "com.android.providers.contacts",
     "android",
 }
 
@@ -258,7 +278,18 @@ PROTECTED_PREFIXES = ("com.droidlogic",)
 def is_protected(pkg):
     return pkg in PROTECTED or pkg.startswith(PROTECTED_PREFIXES)
 
-RISK_COLORS = {"safe": GREEN, "caution": YELLOW}
+NAMES = {
+    "com.amazon.amazonvideo.livingroom": "Prime Video",
+    "com.disney.disneyplus": "Disney+",
+    "com.apple.atve.androidtv.appletv": "Apple TV",
+    "com.netflix.ninja": "Netflix",
+    "com.exxen.android": "Exxen",
+    "com.iqiyi.i18n.tv": "iQIYI",
+    "com.turkcell.ott": "TV+ (Turkcell)",
+    "com.digiturk.iq.mobil": "Digiturk İQ",
+}
+
+RISK_COLORS = {"safe": GREEN, "caution": YELLOW, "optional": BLUE}
 
 
 class Console:
@@ -438,24 +469,52 @@ def build_plan(con, installed, safe_only):
     return plan
 
 
+def choose_optional(con, optional, third_party, args):
+    if not optional:
+        return []
+    if args.include_optional or args.dry_run:
+        return list(optional)
+    if args.yes:
+        con.say("opt_skipped", GRAY, n=len(optional))
+        return []
+    con.say("opt_header", BOLD)
+    chosen = []
+    for entry in optional:
+        pkg = entry[1]
+        key = "opt_ask_user" if pkg in third_party else "opt_ask"
+        if ask_yes(con, key, name=NAMES.get(pkg, pkg), pkg=pkg):
+            chosen.append(entry)
+    con.say()
+    return chosen
+
+
 def do_debloat(con, serial, args):
     con.say("scanning", GRAY)
     installed = get_installed(serial)
-    plan = build_plan(con, installed, args.safe_only)
+    _, third_out = adb(["shell", "pm", "list", "packages", "-3"], serial, timeout=60)
+    third_party = parse_packages(third_out)
+    candidates = build_plan(con, installed, args.safe_only)
     total_candidates = sum(len(v) for v in PACKAGES.values())
-    skipped = total_candidates - len(plan)
 
-    if not plan:
+    if not candidates:
         con.say("plan_empty", GREEN)
         return "empty"
 
     con.say()
     con.say("plan_header", BOLD)
-    for category, pkg, risk in plan:
+    for category, pkg, risk in candidates:
         tag = paint(f"[{category}]", CYAN)
         label = paint(con.t("risk_" + risk), RISK_COLORS[risk])
         print(f"  {tag} {pkg}  ({label})")
     con.say()
+
+    optional = [e for e in candidates if e[2] == "optional"]
+    plan = [e for e in candidates if e[2] != "optional"]
+    plan += choose_optional(con, optional, third_party, args)
+    if not plan:
+        con.say("nothing_selected", YELLOW)
+        return "aborted"
+    skipped = total_candidates - len(plan)
 
     if args.dry_run:
         con.say("dry_notice", YELLOW)
@@ -468,6 +527,7 @@ def do_debloat(con, serial, args):
         "created": datetime.now().isoformat(timespec="seconds"),
         "serial": serial,
         "removed": [],
+        "user_installed": [],
         "animations": {k: get_setting(serial, k) for k in ANIM_KEYS},
     }
 
@@ -484,6 +544,8 @@ def do_debloat(con, serial, args):
         if rc == 0 and "Success" in out:
             print(paint(con.t("pkg_ok"), GREEN))
             backup["removed"].append(pkg)
+            if pkg in third_party:
+                backup["user_installed"].append(pkg)
             ok += 1
         else:
             reason = out.splitlines()[-1] if out else "?"
@@ -552,7 +614,8 @@ def do_restore(con, serial, args):
     data = json.loads(path.read_text(encoding="utf-8"))
 
     con.say("restore_start", BOLD)
-    ok = fail = 0
+    user_installed = set(data.get("user_installed", []))
+    ok = fail = manual = 0
     for pkg in data.get("removed", []):
         sys.stdout.write(f"{paint('->', GRAY)} {pkg}... ")
         sys.stdout.flush()
@@ -563,11 +626,14 @@ def do_restore(con, serial, args):
         if rc == 0 and "installed" in out.lower():
             print(paint(con.t("pkg_ok"), GREEN))
             ok += 1
+        elif pkg in user_installed:
+            print(paint(con.t("pkg_reinstall"), YELLOW))
+            manual += 1
         else:
             reason = out.splitlines()[-1] if out else "?"
             print(paint(con.t("pkg_fail", reason=reason), RED))
             fail += 1
-    con.say("summary_restore", BOLD, ok=ok, fail=fail)
+    con.say("summary_restore", BOLD, ok=ok, fail=fail, manual=manual)
 
     con.say("restore_anim", BLUE)
     for key, value in data.get("animations", {}).items():
@@ -670,6 +736,7 @@ def parse_args():
     p.add_argument("--safe-only", action="store_true", help="Sadece 'guvenli' paketleri kaldir")
     p.add_argument("--no-optimize", action="store_true", help="Animasyon/dexopt atla")
     p.add_argument("--dexopt", action="store_true", help="Dexopt calistir (uzun surer) / run dexopt (slow)")
+    p.add_argument("--include-optional", action="store_true", help="Istege bagli uygulamalari (Netflix vb.) sormadan kaldir / remove optional apps without asking")
     p.add_argument("--anim-scale", default="0.5", help="Animasyon olcegi (varsayilan 0.5)")
     p.add_argument("--no-reboot", action="store_true", help="Sonunda yeniden baslatma")
     p.add_argument("-y", "--yes", action="store_true", help="Onay sorma / no prompts")
