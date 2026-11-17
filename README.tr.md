@@ -39,7 +39,7 @@ Mi Box, hiç istemediğin uygulamalarla geliyor: Mi TV+, Mi Music, analitik serv
 - 💾 **Otomatik yedek ve geri yükleme**: tek menü seçimiyle her şeyi geri al
 - 🛡️ **Korumalı paketler**: launcher, ayarlar, Play Hizmetleri, Chromecast, sesli arama, klavye ve sistem bileşenleri asla silinmez
 - 🔍 **Deneme modu (dry-run)**: bir şey değişmeden önce neyin silineceğini gör
-- ✅ Her paket için risk etiketi (güvenli / dikkat) ve **onay adımı**
+- ✅ Her paket için etiket, onay adımı ve **kullanıyor olabileceğin uygulamalar için ayrı sorular** (Netflix, Prime Video, Disney+ ve diğer yayın uygulamaları)
 - ⚡ **Daha hızlı arayüz**: animasyon ayarı, isteğe bağlı dexopt
 - 📦 **Paket listesi aktarma**: cihazındaki paketleri dosyaya kaydet
 - 📡 **ADB dahil**: Windows sürümü platform-tools ile gelir, kurulum veya PATH ayarı gerekmez
@@ -72,7 +72,8 @@ Mi-Box-Debloater-v1.0.0.exe --ip 192.168.1.45 --lang tr --dry-run
 | `--restore` | Son yedekten paketleri geri yükle |
 | `--backup-file DOSYA` | `--restore` için belirli bir yedek dosyası kullan |
 | `--export-packages` | Cihazdaki paket listesini metin dosyasına kaydet |
-| `--safe-only` | Sadece *güvenli* etiketli paketleri kaldır |
+| `--safe-only` | Sadece *güvenli* etiketli paketleri kaldır (isteğe bağlı yayın uygulamalarını atlar) |
+| `--include-optional` | İsteğe bağlı yayın uygulamalarını sormadan kaldır |
 | `--no-optimize` | Animasyon ayarını ve dexopt'u atla |
 | `--dexopt` | Sormadan dexopt çalıştır (10-30 dakika sürer) |
 | `--anim-scale N` | Animasyon ölçeği, varsayılan `0.5` |
@@ -99,16 +100,23 @@ Mi-Box-Debloater-v1.0.0.exe --ip 192.168.1.45 --lang tr --dry-run
 | Google | `com.google.android.syncadapters.calendar`, `...contacts` | Takvim / kişi senkronu |
 | Google | `com.google.android.videos`, `...music`, `...play.games` | Play Filmler, Play Müzik, Play Oyunlar |
 | Google | `com.google.android.youtube.tvmusic` | YouTube Music TV |
-| Yayın | `com.amazon.amazonvideo.livingroom` | Prime Video |
-| Yayın | `com.disney.disneyplus` | Disney+ |
-| Yayın | `com.apple.atve.androidtv.appletv` | Apple TV |
+| Yayın | `com.amazon.amazonvideo.livingroom` | Prime Video (önce sorulur) |
+| Yayın | `com.disney.disneyplus` | Disney+ (önce sorulur) |
+| Yayın | `com.apple.atve.androidtv.appletv` | Apple TV (önce sorulur) |
+| Yayın | `com.netflix.ninja` | Netflix (önce sorulur) |
+| Yayın | `com.exxen.android` | Exxen (önce sorulur) |
+| Yayın | `com.iqiyi.i18n.tv` | iQIYI (önce sorulur) |
+| Yayın | `com.turkcell.ott` | Turkcell TV+ (önce sorulur) |
+| Yayın | `com.digiturk.iq.mobil` | Digiturk İQ (önce sorulur) |
 | Android | `com.android.htmlviewer`, `com.android.printspooler` | HTML görüntüleyici, yazdırma servisi |
 
-Sadece cihazında gerçekten yüklü olan paketler listelenir ve kaldırılır. **Bu uygulamalardan birini kullanıyorsan (örneğin Disney+), çalıştırmadan önce listeden çıkar.**
+Sadece cihazında gerçekten yüklü olan paketler listelenir ve kaldırılır.
+
+**Yayın uygulamaları isteğe bağlıdır.** Herkes Netflix'i ya da Disney+'ı bloat olarak görmez, bu yüzden araç her biri için ayrıca sorar ve sadece ENTER'a basarsan uygulama kalır. `-y` ile çalıştırırsan, `--include-optional` da vermedikçe bunlar atlanır.
 
 ## 🛡️ Güvenlik
 
-- Paketler `pm uninstall -k --user 0` ile kaldırılır: yani **sadece mevcut kullanıcı için**. Sistem bölümüne dokunulmaz, fabrika ayarlarına dönmek her şeyi geri getirir.
+- Paketler `pm uninstall -k --user 0` ile kaldırılır: yani **sadece mevcut kullanıcı için**. Sistem bölümüne dokunulmaz, fabrika ayarlarına dönmek sistem uygulamalarını geri getirir. Sonradan kendin yüklediğin uygulamalar (örneğin Exxen ya da iQIYI) geri yüklemeden sonra Play Store'dan tekrar kurulmak zorunda kalabilir, araç bunları kaldırmadan önce seni uyarır.
 - Bir şey kaldırılmadan önce exe'nin yanına JSON yedeği kaydedilir. Paketleri geri getirmek için **2) Geri yükle** seçeneğini kullan.
 - Kritik paketler (launcher, ayarlar, Google Play Hizmetleri, Chromecast, sesli arama, klavye, WebView, Amlogic sistem paketleri ve daha fazlası) korumalıdır, listeye yanlışlıkla girse bile atlanır.
 - Emin değilsen önce `--dry-run` kullan.
