@@ -23,7 +23,7 @@
 
 [⬇️ **Download**](https://github.com/bxiefr/Mi-Box-Debloater/releases/latest) · [🐛 Report a bug](https://github.com/bxiefr/Mi-Box-Debloater/issues) · [💡 Request a feature](https://github.com/bxiefr/Mi-Box-Debloater/issues)
 
-<img src="docs/screenshot.png" alt="Mi Box Debloater screenshot" width="620">
+<img src="docs/screenshot.png" alt="Mi Box Debloater screenshot" width="860">
 
 </div>
 
